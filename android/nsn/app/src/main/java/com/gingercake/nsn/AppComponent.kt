@@ -1,5 +1,6 @@
 package com.gingercake.nsn
 
+import com.gingercake.nsn.main.ViewModelFactoryModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector

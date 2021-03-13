@@ -1,4 +1,4 @@
-package com.gingercake.nsn
+package com.gingercake.nsn.main
 
 import androidx.lifecycle.ViewModelProvider
 import dagger.Binds

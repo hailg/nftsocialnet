@@ -4,21 +4,26 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
+import com.facebook.AccessToken
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.gingercake.nsn.R
-import com.gingercake.nsn.ViewModelProvidersFactory
+import com.gingercake.nsn.auth.viewmodel.AuthViewModel
+import com.gingercake.nsn.auth.viewmodel.AuthViewModelFactory
 import com.gingercake.nsn.databinding.ActivityAuthBinding
+import com.gingercake.nsn.model.user.User
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GetTokenResult
+import com.google.firebase.ktx.Firebase
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
 class AuthActivity : DaggerAppCompatActivity() {
     @Inject
-    lateinit var vmProviderFactory: ViewModelProvidersFactory
-
+    lateinit var authViewModelFactory: AuthViewModelFactory
     private lateinit var viewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,14 +31,24 @@ class AuthActivity : DaggerAppCompatActivity() {
         val binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this, vmProviderFactory).get(AuthViewModel::class.java)
-
-        checkUser()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        checkUser()
+        viewModel = ViewModelProvider(this, authViewModelFactory).get(AuthViewModel::class.java)
+        FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            if (user == null) {
+                login()
+            } else {
+                Log.d(TAG, "User is here ${AccessToken.getCurrentAccessToken()}")
+                val nsnUser = User(user.uid,
+                    user.email ?: "",
+                    user.displayName ?: "",
+                    user.photoUrl?.toString() ?: "")
+                viewModel.saveUser(nsnUser)
+                Log.d(
+                    TAG,
+                    "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
+                )
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -44,11 +59,14 @@ class AuthActivity : DaggerAppCompatActivity() {
 
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
-                val user = FirebaseAuth.getInstance().currentUser
-                Log.d(
-                    TAG,
-                    "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
-                )
+//                val user = FirebaseAuth.getInstance().currentUser?.let { u ->
+//                    val nsnUser = User(u.uid, u.email ?: "", u.displayName ?: "", u.photoUrl?.toString() ?: "")
+//                    viewModel.saveUser(nsnUser)
+//                }
+//                Log.d(
+//                    TAG,
+//                    "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
+//                )
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -58,35 +76,20 @@ class AuthActivity : DaggerAppCompatActivity() {
         }
     }
 
-    private fun checkUser() {
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            val providers = arrayListOf(
-                AuthUI.IdpConfig.FacebookBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build()
-            )
-            startActivityForResult(
-                AuthUI.getInstance()
-                    .createSignInIntentBuilder()
-                    .setAvailableProviders(providers)
-                    .setLogo(R.mipmap.logo)
-                    .setTheme(R.style.LoginTheme)
-                    .build(),
-                RC_SIGN_IN
-            )
-        } else {
-            Log.d(TAG, "On checkUser User ${user.email}, ${user.displayName}, ${user.photoUrl}")
-
-            CheckBalanceTask(object : CheckBalanceTask.CheckBalanceTaskCallback {
-                override fun update(updateContent: String) {
-                    Log.d(TAG, "CheckBalanceTask update ${updateContent}")
-                }
-
-                override fun finish(success: Boolean, updateContent: String?, balance: String?) {
-                    Log.d(TAG, "CheckBalanceTask finish ${success}, ${updateContent}, $balance")
-                }
-            }).execute("https://3a921a5762d4.ngrok.io", "bob")
-        }
+    private fun login() {
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.FacebookBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+        startActivityForResult(
+            AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .setLogo(R.mipmap.logo)
+                .setTheme(R.style.LoginTheme)
+                .build(),
+            RC_SIGN_IN
+        )
     }
 
     companion object {
