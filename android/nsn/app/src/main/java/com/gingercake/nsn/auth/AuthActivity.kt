@@ -58,7 +58,6 @@ class AuthActivity : DaggerAppCompatActivity() {
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             val providers = arrayListOf(
-                AuthUI.IdpConfig.EmailBuilder().build(),
                 AuthUI.IdpConfig.FacebookBuilder().build(),
                 AuthUI.IdpConfig.GoogleBuilder().build())
             startActivityForResult(
