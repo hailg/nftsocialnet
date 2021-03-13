@@ -12,12 +12,10 @@ import com.gingercake.nsn.R
 import com.gingercake.nsn.auth.viewmodel.AuthViewModel
 import com.gingercake.nsn.auth.viewmodel.AuthViewModelFactory
 import com.gingercake.nsn.databinding.ActivityAuthBinding
+import com.gingercake.nsn.framework.StateMessageCallback
+import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.model.user.User
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GetTokenResult
-import com.google.firebase.ktx.Firebase
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
@@ -53,25 +51,14 @@ class AuthActivity : DaggerAppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         if (requestCode == RC_SIGN_IN) {
             val response = IdpResponse.fromResultIntent(data)
-
-            if (resultCode == Activity.RESULT_OK) {
-                // Successfully signed in
-//                val user = FirebaseAuth.getInstance().currentUser?.let { u ->
-//                    val nsnUser = User(u.uid, u.email ?: "", u.displayName ?: "", u.photoUrl?.toString() ?: "")
-//                    viewModel.saveUser(nsnUser)
-//                }
-//                Log.d(
-//                    TAG,
-//                    "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
-//                )
-            } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                Log.d(TAG, "Login failed")
+            if (resultCode != Activity.RESULT_OK) {
+                this.displayToast(R.string.sign_in_error, object : StateMessageCallback {
+                    override fun removeMessageFromStack() {
+                    }
+                })
+                Log.d(TAG, "Login failed", response?.error)
             }
         }
     }
