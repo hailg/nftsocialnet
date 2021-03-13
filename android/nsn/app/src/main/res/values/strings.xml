@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">NSN</string>
+    <string name="facebook_app_id">1004374146757609</string>
+    <string name="fb_login_protocol_scheme">fb1004374146757609</string>
+    <string name="facebook_application_id" translatable="false">1004374146757609</string>
+    <string name="facebook_login_protocol_scheme" translatable="false">1004374146757609</string>
+
+
     <string name="text_error">Error</string>
     <string name="text_success">Success</string>
     <string name="text_ok">OK</string>

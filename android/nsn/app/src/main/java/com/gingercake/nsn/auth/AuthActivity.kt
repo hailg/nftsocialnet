@@ -59,6 +59,7 @@ class AuthActivity : DaggerAppCompatActivity() {
         if (user == null) {
             val providers = arrayListOf(
                 AuthUI.IdpConfig.EmailBuilder().build(),
+                AuthUI.IdpConfig.FacebookBuilder().build(),
                 AuthUI.IdpConfig.GoogleBuilder().build())
             startActivityForResult(
                 AuthUI.getInstance()
