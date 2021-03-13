@@ -13,6 +13,9 @@ android {
 
     packagingOptions {
         exclude 'META-INF/atomicfu.kotlin_module'
+        exclude 'lib/x86_64/darwin/libscrypt.dylib'
+        exclude 'lib/x86_64/freebsd/libscrypt.so'
+        exclude 'lib/x86_64/linux/libscrypt.so'
     }
 
     defaultConfig {
@@ -43,6 +46,10 @@ android {
 
     buildFeatures {
         viewBinding = true
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
@@ -95,7 +102,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
 
-    implementation 'com.facebook.android:facebook-android-sdk:[5,6)'
+    // EOSIO
+    implementation 'one.block:eosiojava:1.0.0'
+    implementation 'one.block:eosiojavasoftkeysignatureprovider:1.0.0'
+    implementation 'one.block:eosiojavaandroidabieosserializationprovider:1.0.0'
+    implementation 'one.block:eosio-java-rpc-provider:1.0.0'
+
+    implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

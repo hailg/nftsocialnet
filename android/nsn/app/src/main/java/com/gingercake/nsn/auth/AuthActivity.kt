@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
@@ -44,7 +45,10 @@ class AuthActivity : DaggerAppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
                 val user = FirebaseAuth.getInstance().currentUser
-                Log.d(TAG, "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}")
+                Log.d(
+                    TAG,
+                    "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
+                )
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
@@ -59,7 +63,8 @@ class AuthActivity : DaggerAppCompatActivity() {
         if (user == null) {
             val providers = arrayListOf(
                 AuthUI.IdpConfig.FacebookBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build())
+                AuthUI.IdpConfig.GoogleBuilder().build()
+            )
             startActivityForResult(
                 AuthUI.getInstance()
                     .createSignInIntentBuilder()
@@ -67,9 +72,20 @@ class AuthActivity : DaggerAppCompatActivity() {
                     .setLogo(R.mipmap.logo)
                     .setTheme(R.style.LoginTheme)
                     .build(),
-                RC_SIGN_IN)
+                RC_SIGN_IN
+            )
         } else {
             Log.d(TAG, "On checkUser User ${user.email}, ${user.displayName}, ${user.photoUrl}")
+
+            CheckBalanceTask(object : CheckBalanceTask.CheckBalanceTaskCallback {
+                override fun update(updateContent: String) {
+                    Log.d(TAG, "CheckBalanceTask update ${updateContent}")
+                }
+
+                override fun finish(success: Boolean, updateContent: String?, balance: String?) {
+                    Log.d(TAG, "CheckBalanceTask finish ${success}, ${updateContent}, $balance")
+                }
+            }).execute("https://3a921a5762d4.ngrok.io", "bob")
         }
     }
 

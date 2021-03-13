@@ -4,3 +4,5 @@ android/.gradle/
 android/.idea/
 android/nsn/app/release/
 keystore
+ngrok
+nodeos.log
