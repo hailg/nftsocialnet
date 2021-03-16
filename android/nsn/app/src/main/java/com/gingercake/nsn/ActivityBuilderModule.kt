@@ -5,6 +5,8 @@ import com.gingercake.nsn.auth.AuthScope
 import com.gingercake.nsn.auth.viewmodel.AuthViewModelModule
 import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.main.MainFragmentBuildersModule
+import com.gingercake.nsn.main.MainScope
+import com.gingercake.nsn.main.MainViewModelModule
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
@@ -17,7 +19,9 @@ abstract class ActivityBuilderModule {
     ])
     abstract fun contributeAuthActivity(): AuthActivity
 
+    @MainScope
     @ContributesAndroidInjector(modules = [
+//        MainViewModelModule::class,
         MainFragmentBuildersModule::class
     ])
     abstract fun contributeMainActivity(): MainActivity

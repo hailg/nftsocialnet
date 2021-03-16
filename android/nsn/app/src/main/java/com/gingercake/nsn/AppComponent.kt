@@ -1,6 +1,5 @@
 package com.gingercake.nsn
 
-import com.gingercake.nsn.main.ViewModelFactoryModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -11,8 +10,7 @@ import javax.inject.Singleton
 @Component(modules = [
     AndroidSupportInjectionModule::class,
     ActivityBuilderModule::class,
-    AppModule::class,
-    ViewModelFactoryModule::class
+    AppModule::class
 ])
 interface AppComponent : AndroidInjector<NSNApplication> {
     @Component.Factory

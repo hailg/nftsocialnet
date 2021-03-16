@@ -9,11 +9,12 @@ import com.facebook.AccessToken
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.gingercake.nsn.R
+import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.auth.viewmodel.AuthViewModel
 import com.gingercake.nsn.auth.viewmodel.AuthViewModelFactory
 import com.gingercake.nsn.databinding.ActivityAuthBinding
-import com.gingercake.nsn.framework.StateMessageCallback
 import com.gingercake.nsn.framework.displayToast
+import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.model.user.User
 import com.google.firebase.auth.FirebaseAuth
 import dagger.android.support.DaggerAppCompatActivity
@@ -40,11 +41,32 @@ class AuthActivity : DaggerAppCompatActivity() {
                     user.email ?: "",
                     user.displayName ?: "",
                     user.photoUrl?.toString() ?: "")
-                viewModel.saveUser(nsnUser)
+                SessionManager.currentUser = nsnUser
+//                viewModel.saveUser(nsnUser)
                 Log.d(
                     TAG,
                     "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
                 )
+//                FirebaseFirestore
+//                    .getInstance()
+//                    .collection(Constants.POSTS_COLLECTION)
+//                    .add(Post(
+//                        id = "B5CCVKUTOZwl5CiSyziE",
+//                        owner = "Hai Le Gia",
+//                        title = "Test Title",
+//                        content = "",
+//                        resource = "https://canary.contestimg.wish.com/api/webimage/5d24728ab67b3f28509126f2-large.jpg?cache_buster=c0f26b46a60b47a2b2381cc718ecde21",
+//                        timestamp = System.currentTimeMillis()
+//                    ))
+//                    .addOnSuccessListener {
+//                            Log.d(TAG, "DocumentSnapshot successfully written!")
+//                    }
+//                    .addOnFailureListener {
+//                            e -> Log.w(TAG, "Error writing document", e)
+//                    }
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
         }
     }
@@ -54,10 +76,7 @@ class AuthActivity : DaggerAppCompatActivity() {
         if (requestCode == RC_SIGN_IN) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode != Activity.RESULT_OK) {
-                this.displayToast(R.string.sign_in_error, object : StateMessageCallback {
-                    override fun removeMessageFromStack() {
-                    }
-                })
+                this.displayToast(R.string.sign_in_error)
                 Log.d(TAG, "Login failed", response?.error)
             }
         }

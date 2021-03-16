@@ -8,6 +8,7 @@ import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.RequestOptions
 import com.gingercake.nsn.model.user.UserDao
 import com.gingercake.nsn.model.user.UserRepo
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -49,5 +50,11 @@ object AppModule {
     @Provides
     fun provideUserDao(database: AppDatabase): UserDao {
         return database.getUserDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseStore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }

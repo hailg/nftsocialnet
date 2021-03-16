@@ -11,5 +11,14 @@
     <string name="text_ok">OK</string>
     <string name="text_cancel">Cancel</string>
     <string name="sign_in_error">Failed to login. Please try again.</string>
+    <string name="added">Added</string>
+    <string name="modified">Modified</string>
+    <string name="removed">Removed</string>
+    <string name="no_more_data">No more data...</string>
 
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="home">Home</string>
+    <string name="search">Search</string>
+    <string name="hot_posts">Hot Posts</string>
+    <string name="profile">Profile</string>
 </resources>

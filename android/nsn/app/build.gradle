@@ -69,6 +69,7 @@ dependencies {
 
     // Room components
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     kapt "androidx.room:room-compiler:$rootProject.roomVersion"
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$rootProject.roomVersion"
@@ -86,12 +87,15 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutines"
     api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutines"
-
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$rootProject.coroutines"
     // UI
     implementation "androidx.constraintlayout:constraintlayout:$rootProject.constraintLayoutVersion"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "com.google.android.material:material:$rootProject.materialVersion"
     implementation "com.afollestad.material-dialogs:core:$rootProject.matieralDialogsVersion"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.swipeRefreshLayoutVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
 
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navVersion"
@@ -114,12 +118,17 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:26.7.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx'
+    implementation 'com.google.firebase:firebase-storage-ktx'
+
+    // Paging
+    implementation "androidx.paging:paging-runtime:$project.pagingVersion"
 
     // EOSIO
-    implementation 'one.block:eosiojava:1.0.0'
-    implementation 'one.block:eosiojavasoftkeysignatureprovider:1.0.0'
-    implementation 'one.block:eosiojavaandroidabieosserializationprovider:1.0.0'
-    implementation 'one.block:eosio-java-rpc-provider:1.0.0'
+//    implementation 'one.block:eosiojava:1.0.0'
+//    implementation 'one.block:eosiojavasoftkeysignatureprovider:1.0.0'
+//    implementation 'one.block:eosiojavaandroidabieosserializationprovider:1.0.0'
+//    implementation 'one.block:eosio-java-rpc-provider:1.0.0'
 
     implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
 

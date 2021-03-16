@@ -3,23 +3,18 @@ package com.gingercake.nsn.framework
 import android.app.Activity
 import android.widget.Toast
 import androidx.annotation.StringRes
-
-private val TAG: String = "AppDebug"
+import androidx.fragment.app.Fragment
 
 fun Activity.displayToast(
-    @StringRes message:Int,
-    stateMessageCallback: StateMessageCallback
+    @StringRes message:Int
 ){
     Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-    stateMessageCallback.removeMessageFromStack()
 }
 
 fun Activity.displayToast(
-    message:String,
-    stateMessageCallback: StateMessageCallback
+    message:String
 ){
     Toast.makeText(this,message, Toast.LENGTH_LONG).show()
-    stateMessageCallback.removeMessageFromStack()
 }
 
 

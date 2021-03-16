@@ -43,4 +43,6 @@ ext {
     daggerVersion = '2.33'
     matieralDialogsVersion = '3.3.0'
     navVersion = '2.3.4'
+    pagingVersion = '3.0.0-beta02'
+    swipeRefreshLayoutVersion = '1.1.0'
 }
