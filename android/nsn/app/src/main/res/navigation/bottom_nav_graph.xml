@@ -7,9 +7,25 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.gingercake.nsn.main.home.HomeFragment"
+        android:name="com.gingercake.nsn.main.home.ui.HomeFragment"
         android:label="@string/home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_postDetailFragment"
+            app:destination="@id/postDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_newPostFragment"
+            app:destination="@id/newPostFragment" app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.gingercake.nsn.main.search.SearchFragment"
@@ -26,8 +42,40 @@
         android:label="@string/profile"
         tools:layout="@layout/fragment_profile" >
         <action
-            android:id="@+id/action_postsFragment_to_postDetailFragment"
+            android:id="@+id/action_profileFragment_to_postDetailFragment"
             app:destination="@id/postDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_profileFragment_to_newPostFragment"
+            app:destination="@id/newPostFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/postDetailFragment"
+        android:name="com.gingercake.nsn.main.postdetail.PostDetailFragment"
+        android:label="Comments"
+        tools:layout="@layout/fragment_post_detail">
+
+        <argument android:name="postId" app:argType="string" />
+
+    </fragment>
+    <fragment
+        android:id="@+id/newPostFragment"
+        android:name="com.gingercake.nsn.main.newpost.NewPostFragment"
+        android:label="@string/create_post"
+        tools:layout="@layout/fragment_new_post" >
+        <action
+            android:id="@+id/action_newPostFragment_to_newPostSaleSettingFragment"
+            app:destination="@id/newPostSaleSettingFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
@@ -35,12 +83,14 @@
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
-        android:id="@+id/postDetailFragment"
-        android:name="com.gingercake.nsn.main.postdetail.PostDetailFragment"
-        android:label="fragment_post_detail"
-        tools:layout="@layout/fragment_post_detail">
+        android:id="@+id/newPostSaleSettingFragment"
+        android:name="com.gingercake.nsn.main.newpost.NewPostSaleSettingFragment"
+        android:label="@string/sale_settings"
+        tools:layout="@layout/fragment_new_post_sale_setting">
 
-        <argument android:name="postId" app:argType="string" />
+        <argument android:name="postTitle" app:argType="string" />
+        <argument android:name="postContent" app:argType="string" />
+        <argument android:name="resourcePath" app:argType="string" />
 
     </fragment>
 </navigation>

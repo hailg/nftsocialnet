@@ -42,7 +42,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                     user.displayName ?: "",
                     user.photoUrl?.toString() ?: "")
                 SessionManager.currentUser = nsnUser
-//                viewModel.saveUser(nsnUser)
+                viewModel.saveUser(nsnUser)
                 Log.d(
                     TAG,
                     "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"

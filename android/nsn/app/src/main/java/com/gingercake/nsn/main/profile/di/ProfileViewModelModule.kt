@@ -12,10 +12,6 @@ import dagger.multibindings.IntoMap
 abstract class ProfileViewModelModule {
     @ProfileScope
     @Binds
-    internal abstract fun bindViewModelFactory(vmProvidersFactory: ProfileViewModelFactory): ViewModelProvider.Factory
-
-    @ProfileScope
-    @Binds
     @IntoMap
     @MainViewModelKey(ProfileViewModel::class)
     internal abstract fun bindPostViewModel(viewModel: ProfileViewModel): ViewModel

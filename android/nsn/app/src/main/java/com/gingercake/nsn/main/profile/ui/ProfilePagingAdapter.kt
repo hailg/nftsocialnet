@@ -1,9 +1,12 @@
 package com.gingercake.nsn.main.profile.ui
 
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -11,13 +14,17 @@ import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.LayoutPostListItemBinding
-import com.gingercake.nsn.model.user.Post
+import com.gingercake.nsn.model.post.Post
+import com.google.firebase.storage.FirebaseStorage
 
 class ProfilePagingAdapter (
+        private val profileViewModel: ProfileViewModel,
         private val interaction: Interaction? = null,
         private val requestManager: RequestManager) : PagingDataAdapter<Post, ProfilePagingAdapter.PostViewHolder>(Companion) {
 
     companion object : DiffUtil.ItemCallback<Post>() {
+        private const val TAG = "ProfilePagingAdapter"
+
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
             return oldItem.id == newItem.id
         }
@@ -37,7 +44,7 @@ class ProfilePagingAdapter (
         viewType: Int
     ): PostViewHolder {
         val binding = LayoutPostListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, interaction, requestManager)
+        return PostViewHolder(profileViewModel, binding, interaction, requestManager)
     }
 
     interface Interaction {
@@ -46,9 +53,10 @@ class ProfilePagingAdapter (
 
     class PostViewHolder
     constructor(
-            private val binding: LayoutPostListItemBinding,
-            private val interaction: Interaction?,
-            private val requestManager: RequestManager
+        private val profileViewModel: ProfileViewModel,
+        private val binding: LayoutPostListItemBinding,
+        private val interaction: Interaction?,
+        private val requestManager: RequestManager
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Post?) = with(binding) {
@@ -61,23 +69,29 @@ class ProfilePagingAdapter (
                         binding.postCardView.isVisible = false
                         binding.profileContainer.isVisible = true
 
-                        binding.nameField.text = item.title
-                        if (item.resource.isNotEmpty()) {
-                            requestManager
-                                .load(item.resource)
-                                .dontAnimate()
-                                .into(binding.profileImage)
-                        }
+                        binding.nameField.text = item.owner.name
+                        requestManager
+                            .load(item.owner.photoUrl)
+                            .dontAnimate()
+                            .into(binding.profileImage)
                     }
                     else -> {
-                        if (item.owner == SessionManager.currentUser.uid) {
-                            binding.authorImage.isVisible = true
-                            requestManager
-                                .load(SessionManager.currentUser.photoUrl)
-                                .dontAnimate()
-                                .into(binding.authorImage)
-                        } else {
-                            binding.authorImage.isVisible = false
+                        requestManager
+                            .load(item.owner.photoUrl)
+                            .dontAnimate()
+                            .into(binding.authorImage)
+                        if (item.resourceType == Post.IMAGE_TYPE && item.resource.isNotEmpty()) {
+                            if (item.resource.startsWith("http")) {
+                                requestManager
+                                    .load(item.resource)
+                                    .into(binding.postImage)
+                            } else {
+                                val resourceRef = FirebaseStorage.getInstance().reference.child(item.resource)
+                                requestManager
+                                    .load(resourceRef)
+                                    .into(binding.postImage)
+                            }
+
                         }
                         binding.postCardView.isVisible = true
                         binding.profileContainer.isVisible = false
@@ -88,7 +102,7 @@ class ProfilePagingAdapter (
                             binding.postContent.isVisible = true
                             binding.postContent.text = item.content
                         }
-                        binding.authorName.text = item.owner
+                        binding.authorName.text = item.owner.name
                         binding.updateDate.text = DateUtils.getRelativeDateTimeString(
                             itemView.context,
                             item.timestamp,
@@ -96,15 +110,55 @@ class ProfilePagingAdapter (
                             DateUtils.WEEK_IN_MILLIS,
                             DateUtils.FORMAT_SHOW_TIME
                         )
-                        if (item.resourceType == Post.IMAGE_TYPE && item.resource.isNotEmpty()) {
-                            requestManager
-                                .load(item.resource)
-                                .transition(DrawableTransitionOptions.withCrossFade())
-                                .into(binding.postImage)
+                        binding.likeCount.text = item.likes.size.toString()
+                        if (item.commentCount > 0) {
+                            binding.commentCount.isVisible = true
+                            binding.commentCount.text = item.commentCount.toString()
+                        } else {
+                            binding.commentCount.isVisible = false
+                        }
+                        if (item.price != "-1") {
+                            binding.price.isVisible = true
+                            binding.price.text = "${item.price} NSN"
+                        } else {
+                            binding.price.isVisible = false
+                        }
+                        val isLiked = item.likes.contains(SessionManager.currentUser.uid)
+                        if (isLiked) {
+                            binding.likeText.text = "Unlike"
+                        } else {
+                            binding.likeText.text = "Like"
+                        }
+                        val likes = item.likes.toMutableSet()
+                        binding.likeBtn.setOnClickListener {
+                            if (binding.likeText.text == "Like") {
+                                likes.add(SessionManager.currentUser.uid)
+                                binding.likeText.text = "Unlike"
+                                profileViewModel.likePost(SessionManager.currentUser, item.id)
+                            } else {
+                                likes.remove(SessionManager.currentUser.uid)
+                                binding.likeText.text = "Like"
+                                profileViewModel.unlikePost(SessionManager.currentUser, item.id)
+                            }
+                            binding.likeCount.text = likes.size.toString()
+                        }
+                        binding.commentBtn.setOnClickListener {
+                            Log.d(TAG, "onClick: Comment Button")
+                            interaction?.onItemSelected(bindingAdapterPosition, item)
+                        }
+
+                        binding.buyBtn.setOnClickListener {
+                            if (item.owner.uid == SessionManager.currentUser.uid) {
+                                Toast
+                                    .makeText(binding.buyBtn.context, "Cannot buy this post. You are already the owner.", Toast.LENGTH_SHORT)
+                                    .show()
+                                return@setOnClickListener
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 }

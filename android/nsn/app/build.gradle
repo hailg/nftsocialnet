@@ -96,12 +96,14 @@ dependencies {
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$rootProject.swipeRefreshLayoutVersion"
     implementation "androidx.appcompat:appcompat:$rootProject.appCompatVersion"
     implementation 'de.hdodenhof:circleimageview:3.1.0'
-
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.4.Final'
     // Navigation
     implementation "androidx.navigation:navigation-fragment-ktx:$rootProject.navVersion"
     implementation "androidx.navigation:navigation-ui-ktx:$rootProject.navVersion"
     // Feature module Support
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$rootProject.navVersion"
+
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.22'
 
     // Dagger
     implementation "com.google.dagger:dagger:$rootProject.daggerVersion"
@@ -117,12 +119,19 @@ dependencies {
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:26.7.0')
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
+//    implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
+    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
+    implementation 'com.firebaseui:firebase-ui-storage:7.1.1'
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'com.firebaseui:firebase-ui-firestore:7.1.1'
 
     // Paging
-    implementation "androidx.paging:paging-runtime:$project.pagingVersion"
+    implementation "androidx.paging:paging-runtime-ktx:$project.pagingVersion"
+
+    // Camera
+    implementation 'com.aminography:choosephotohelper:1.3.1'
+
 
     // EOSIO
 //    implementation 'one.block:eosiojava:1.0.0'
@@ -130,7 +139,8 @@ dependencies {
 //    implementation 'one.block:eosiojavaandroidabieosserializationprovider:1.0.0'
 //    implementation 'one.block:eosio-java-rpc-provider:1.0.0'
 
-    implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
+//    implementation 'com.facebook.android:facebook-android-sdk:5.15.3'
+    implementation 'com.facebook.android:facebook-login:8.1.0'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

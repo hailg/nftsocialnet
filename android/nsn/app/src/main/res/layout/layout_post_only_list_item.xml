@@ -4,52 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingVertical="4dp"
+    android:paddingHorizontal="8dp"
     android:background="@color/default_background_color">
-
-    <RelativeLayout
-        android:id="@+id/profile_container"
-
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:background="@color/colorPrimary"
-        android:padding="20dp">
-
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/profile_image"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            app:civ_border_width="2dp"
-            app:civ_border_color="@color/white"
-            android:layout_marginTop="20dp"
-            android:layout_centerHorizontal="true"
-            />
-
-        <TextView
-            android:id="@+id/name_field"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/profile_image"
-            android:includeFontPadding="false"
-            android:textColor="@color/tealLight"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/balance_field"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/name_field"
-            android:layout_centerHorizontal="true"
-            android:includeFontPadding="false"
-
-            android:textColor="@color/tealLight"
-            android:textSize="14sp" />
-    </RelativeLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/postCardView"
-        android:layout_marginVertical="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="5dp"

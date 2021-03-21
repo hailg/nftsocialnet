@@ -1,4 +1,4 @@
-package com.gingercake.nsn.main
+package com.gingercake.nsn.main.di
 
 import javax.inject.Scope
 

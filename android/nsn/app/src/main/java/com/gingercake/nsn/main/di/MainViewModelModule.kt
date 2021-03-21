@@ -1,8 +1,10 @@
-package com.gingercake.nsn.main
+package com.gingercake.nsn.main.di
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.gingercake.nsn.main.profile.ui.ProfileViewModel
+import com.gingercake.nsn.main.MainViewModel
+import com.gingercake.nsn.main.MainViewModelFactory
+import com.gingercake.nsn.main.MainViewModelKey
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -16,6 +18,6 @@ abstract class MainViewModelModule {
     @MainScope
     @Binds
     @IntoMap
-    @MainViewModelKey(ProfileViewModel::class)
-    internal abstract fun bindPostViewModel(viewModel: ProfileViewModel): ViewModel
+    @MainViewModelKey(MainViewModel::class)
+    internal abstract fun bindMainViewModel(viewModel: MainViewModel): ViewModel
 }
