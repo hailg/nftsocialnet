@@ -17,7 +17,7 @@ open class BaseChildFragment : DaggerFragment() {
     }
 
     fun createPost(title: String, content: String,
-                   resourcePath: String?, resourceType: Int, price: String) {
+                   resourcePath: String, resourceType: Int, price: String) {
         activity?.let {
             (activity as MainActivity).createPost(title, content, resourcePath, resourceType, price)
         }

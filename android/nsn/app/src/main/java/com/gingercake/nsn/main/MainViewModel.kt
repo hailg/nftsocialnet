@@ -44,8 +44,8 @@ class MainViewModel @Inject constructor(
     val postCreationLiveData: LiveData<CreatePostProgress> = _postCreationLiveData
 
     fun createPost(title: String, content: String,
-                   resourcePath: String?, resourceType: Int, price: String) = viewModelScope.launch {
-        val resourceName = resourcePath?.let {
+                   resourcePath: String, resourceType: Int, price: String) = viewModelScope.launch {
+        val resourceName = if (!resourcePath.isBlank()) {
             val file = Uri.fromFile(java.io.File(resourcePath))
             val dotIndex = resourcePath.lastIndexOf('.')
             val fileExt = if (dotIndex > -1) {
@@ -75,7 +75,7 @@ class MainViewModel @Inject constructor(
                     _postCreationLiveData.postValue(CreatePostProgress(CreatePostProgress.UPLOADED, it.bytesTransferred, it.totalByteCount))
                 }.await()
             uploadingName
-        } ?: ""
+        } else ""
 
         val postId = UUID.randomUUID().toString().replace("-", "")
         val post = Post.newInstance(postId, title, content, resourceName, resourceType, price, SessionManager.currentUser)

@@ -88,7 +88,7 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     fun createPost(title: String, content: String,
-                   resourcePath: String?, resourceType: Int, price: String) {
+                   resourcePath: String, resourceType: Int, price: String) {
         mainViewModel.createPost(title, content, resourcePath, resourceType, price)
     }
 

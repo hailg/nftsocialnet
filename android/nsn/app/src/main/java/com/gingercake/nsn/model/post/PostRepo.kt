@@ -6,7 +6,6 @@ import com.gingercake.nsn.model.user.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.util.*
@@ -27,6 +26,30 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
         db.runTransaction { transaction ->
             transaction.update(postRef, "commentCount", FieldValue.increment(1))
             transaction.set(commentRef, comment)
+        }.await()
+    }
+
+    suspend fun likePost(user: User, postId: String) {
+        val postRef = db
+            .collection(Constants.POSTS_COLLECTION).document(postId)
+        val likeRef = postRef
+            .collection(Constants.LIKES_COLLECTION).document(user.uid)
+
+        db.runTransaction{ transaction ->
+            transaction.update(postRef, "likes", FieldValue.arrayUnion(user.uid))
+            transaction.set(likeRef, Like(user.uid, user.name, user.photoUrl))
+        }.await()
+    }
+
+    suspend fun unlikePost(user: User, postId: String) {
+        val postRef = db
+            .collection(Constants.POSTS_COLLECTION).document(postId)
+        val likeRef = postRef
+            .collection(Constants.LIKES_COLLECTION).document(user.uid)
+
+        db.runTransaction{ transaction ->
+            transaction.delete(likeRef)
+            transaction.update(postRef, "likes", FieldValue.arrayRemove(user.uid))
         }.await()
     }
 
@@ -68,30 +91,6 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
         }.await()
     }
 
-    suspend fun likePost(user: User, postId: String) {
-        val postRef = db
-            .collection(Constants.POSTS_COLLECTION).document(postId)
-        val likeRef = postRef
-            .collection(Constants.LIKES_COLLECTION).document(user.uid)
-
-        db.runTransaction{ transaction ->
-            transaction.update(postRef, "likes", FieldValue.arrayUnion(user.uid))
-            transaction.set(likeRef, Like(user.uid, user.name, user.photoUrl))
-        }.await()
-    }
-
-    suspend fun unlikePost(user: User, postId: String) {
-        val postRef = db
-            .collection(Constants.POSTS_COLLECTION).document(postId)
-        val likeRef = postRef
-            .collection(Constants.LIKES_COLLECTION).document(user.uid)
-
-        db.runTransaction{ transaction ->
-            transaction.delete(likeRef)
-            transaction.update(postRef, "likes", FieldValue.arrayRemove(user.uid))
-        }.await()
-    }
-    
     companion object {
         private const val TAG = "PostRepo"
     }

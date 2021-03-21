@@ -1,7 +1,10 @@
 package com.gingercake.nsn.auth
 
 import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +20,8 @@ import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.model.user.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
@@ -29,6 +34,29 @@ class AuthActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create channel to show notifications.
+            val channelId = getString(R.string.default_notification_channel_id)
+            val channelName = getString(R.string.default_notification_channel_name)
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager?.createNotificationChannel(
+                NotificationChannel(channelId,
+                channelName, NotificationManager.IMPORTANCE_LOW)
+            )
+        }
+
+        intent.extras?.let {
+            for (key in it.keySet()) {
+                val value = intent.extras?.get(key)
+                Log.d(TAG, "Notification Key: $key Value: $value")
+            }
+        }
+
+        Firebase.messaging.subscribeToTopic("general")
+            .addOnCompleteListener { task ->
+                Log.d(TAG, "Subscribe to firebase general topic reuslt ${task.isSuccessful}")
+            }
 
         viewModel = ViewModelProvider(this, authViewModelFactory).get(AuthViewModel::class.java)
         FirebaseAuth.getInstance().addAuthStateListener { firebaseAuth ->
@@ -47,25 +75,13 @@ class AuthActivity : DaggerAppCompatActivity() {
                     TAG,
                     "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
                 )
-//                FirebaseFirestore
-//                    .getInstance()
-//                    .collection(Constants.POSTS_COLLECTION)
-//                    .add(Post(
-//                        id = "B5CCVKUTOZwl5CiSyziE",
-//                        owner = "Hai Le Gia",
-//                        title = "Test Title",
-//                        content = "",
-//                        resource = "https://canary.contestimg.wish.com/api/webimage/5d24728ab67b3f28509126f2-large.jpg?cache_buster=c0f26b46a60b47a2b2381cc718ecde21",
-//                        timestamp = System.currentTimeMillis()
-//                    ))
-//                    .addOnSuccessListener {
-//                            Log.d(TAG, "DocumentSnapshot successfully written!")
-//                    }
-//                    .addOnFailureListener {
-//                            e -> Log.w(TAG, "Error writing document", e)
-//                    }
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+                val mainIntent = Intent(this, MainActivity::class.java)
+                intent.extras?.let {
+                    for (key in it.keySet()) {
+                        mainIntent.putExtra(key, it.getString(key))
+                    }
+                }
+                startActivity(mainIntent)
                 finish()
             }
         }

@@ -68,7 +68,7 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                 args.postTitle,
                 args.postContent,
                 args.resourcePath,
-                if (args.resourcePath.isNullOrBlank()) Post.TEXT_ONLY_TYPE else Post.IMAGE_TYPE,
+                if (args.resourcePath.isBlank()) Post.TEXT_ONLY_TYPE else Post.IMAGE_TYPE,
                 price
             )
             findNavController().popBackStack()
