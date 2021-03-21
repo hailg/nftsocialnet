@@ -1,4 +1,4 @@
-.DS_Store
+**/.DS_Store
 android/.DS_Store
 android/.gradle/
 android/.idea/
@@ -6,3 +6,4 @@ android/nsn/app/release/
 keystore
 ngrok
 nodeos.log
+**/*.log
