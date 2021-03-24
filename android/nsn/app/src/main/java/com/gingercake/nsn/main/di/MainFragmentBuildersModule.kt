@@ -1,6 +1,7 @@
 package com.gingercake.nsn.main.di
 
 import com.gingercake.nsn.main.home.ui.HomeFragment
+import com.gingercake.nsn.main.hotposts.HotPostsFragment
 import com.gingercake.nsn.main.newpost.NewPostFragment
 import com.gingercake.nsn.main.newpost.NewPostSaleSettingFragment
 import com.gingercake.nsn.main.postdetail.PostDetailFragment
@@ -29,4 +30,7 @@ abstract class MainFragmentBuildersModule {
 
     @ContributesAndroidInjector
     abstract fun contributeHomeFragment(): HomeFragment
+
+    @ContributesAndroidInjector
+    abstract fun contributeHotPostFragment(): HotPostsFragment
 }

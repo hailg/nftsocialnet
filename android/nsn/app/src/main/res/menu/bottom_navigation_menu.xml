@@ -5,10 +5,6 @@
         android:title="@string/home"
         android:icon="@drawable/ic_baseline_home_24"/>
 
-    <item android:id="@+id/searchFragment"
-        android:title="@string/search"
-        android:icon="@drawable/ic_baseline_search_24"/>
-
     <item android:id="@+id/hotPostsFragment"
         android:title="@string/hot_posts"
         android:icon="@drawable/ic_baseline_whatshot_24"/>
@@ -16,5 +12,9 @@
     <item android:id="@+id/profileFragment"
         android:title="@string/profile"
         android:icon="@drawable/ic_baseline_person_24"/>
+
+    <item android:id="@+id/blockChainFragment"
+        android:title="@string/block_chain"
+        android:icon="@drawable/ic_blockchain_24"/>
 
 </menu>

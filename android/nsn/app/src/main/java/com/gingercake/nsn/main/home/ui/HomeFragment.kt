@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
+import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentHomeBinding
 import com.gingercake.nsn.framework.Constants
 import com.gingercake.nsn.framework.displayToast
@@ -39,6 +40,7 @@ class HomeFragment : DaggerFragment(), HomePagingAdapter.Listener {
     private lateinit var mainViewModel: MainViewModel
     private lateinit var binding: FragmentHomeBinding
     private lateinit var postAdapter: HomePagingAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainViewModel = ViewModelProvider(this, mainViewModelFactory).get(MainViewModel::class.java)
@@ -82,7 +84,6 @@ class HomeFragment : DaggerFragment(), HomePagingAdapter.Listener {
                 CreatePostProgress.FAIL -> activity?.displayToast("Failed to create post. Please try again!")
             }
         })
-//        refresh()
     }
 
     override fun onStart() {
@@ -94,9 +95,11 @@ class HomeFragment : DaggerFragment(), HomePagingAdapter.Listener {
         super.onStop()
         postAdapter.stopListening()
     }
+
     override fun onItemSelected(position: Int, item: Post) {
         val action = HomeFragmentDirections.actionHomeFragmentToPostDetailFragment(item.id)
         findNavController().navigate(action)
+        mainViewModel.viewPost(SessionManager.currentUser, item)
     }
 
     override fun onLoadingStateChanged(state: LoadingState) {
@@ -126,8 +129,12 @@ class HomeFragment : DaggerFragment(), HomePagingAdapter.Listener {
         }
     }
 
+    override fun onItemBuying(position: Int, item: Post) {
+
+    }
+
     private fun refresh() {
-        postAdapter?.refresh()
+        postAdapter.refresh()
     }
 
     companion object {

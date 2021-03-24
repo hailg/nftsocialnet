@@ -8,7 +8,8 @@ data class User(
     val uid: String,
     val email: String,
     val name: String,
-    val photoUrl: String
+    val photoUrl: String,
+    val nsnAmount: String = "0"
 ) : Parcelable {
     constructor() : this("", "", "", "")
 
@@ -17,5 +18,11 @@ data class User(
         other as User
         if (uid != other.uid) return false
         return true
+    }
+
+    override fun hashCode(): Int {
+        var result = uid.hashCode()
+        result = 31 * result + nsnAmount.hashCode()
+        return result
     }
 }

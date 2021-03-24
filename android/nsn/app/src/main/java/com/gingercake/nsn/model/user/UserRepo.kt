@@ -39,6 +39,9 @@ class UserRepo @Inject constructor(private val db: FirebaseFirestore) {
         db
             .collection(Constants.USERS_COLLECTION)
             .document(user.uid)
-            .set(user, SetOptions.merge()).await()
+            .set(mapOf("uid" to user.uid,
+                "name" to user.name,
+                "email" to user.email,
+                "photoUrl" to user.photoUrl), SetOptions.merge()).await()
     }
 }

@@ -83,6 +83,14 @@ class MainViewModel @Inject constructor(
         _postCreationLiveData.postValue(CreatePostProgress(CreatePostProgress.SUCCESS, post = post))
     }
 
+    fun viewPost(user: User, post: Post) {
+        viewModelScope.launch {
+            if (post.owner.uid != user.uid && post.author.uid != user.uid) {
+                postRepo.viewPost(user, post.id)
+            }
+        }
+    }
+
     fun likePost(user: User, postId: String) {
         viewModelScope.launch {
             postRepo.likePost(user, postId)

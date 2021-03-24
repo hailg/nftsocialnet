@@ -7,16 +7,35 @@ import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.gingercake.nsn.R
+import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.auth.AuthActivity
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-class NSNFirebaseMessagingService constructor() : FirebaseMessagingService() {
+class NSNFirebaseMessagingService : FirebaseMessagingService() {
 
-    override fun onNewToken(p0: String) {
-        super.onNewToken(p0)
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        try {
+            FirebaseFirestore
+                .getInstance()
+                .collection(Constants.USERS_COLLECTION)
+                .document(SessionManager.currentUser.uid)
+                .update("fcmTokens", FieldValue.arrayUnion(token))
+                .addOnFailureListener {
+                    Log.w("NSNFirebaseMessagingService", "onUpdatingFCMToken: failed", it)
+                }
+                .addOnSuccessListener {
+                    Log.d("NSNFirebaseMessagingService", "onUpdatingFCMToken: Successful")
+                }
+        } catch (e: Exception) {
+            Log.w("NSNFirebaseMessagingService", "onNewToken: Failed", e)
+        }
     }
 
     override fun onMessageReceived(remoteMEssage: RemoteMessage) {

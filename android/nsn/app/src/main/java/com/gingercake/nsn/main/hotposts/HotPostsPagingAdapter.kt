@@ -1,4 +1,4 @@
-package com.gingercake.nsn.main.home.ui
+package com.gingercake.nsn.main.hotposts
 
 import android.text.format.DateUtils
 import android.util.Log
@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
@@ -18,12 +17,12 @@ import com.gingercake.nsn.main.MainViewModel
 import com.gingercake.nsn.model.post.Post
 import com.google.firebase.storage.FirebaseStorage
 
-class HomePagingAdapter constructor(
+class HotPostsPagingAdapter constructor(
     private val options: FirestorePagingOptions<Post>,
     private val mainViewModel: MainViewModel,
-    private val listener: HomePagingAdapter.Listener,
+    private val listener: Listener,
     private val imageLoader: RequestManager
-) : FirestorePagingAdapter<Post, HomePagingAdapter.PostViewHolder>(options) {
+) : FirestorePagingAdapter<Post, HotPostsPagingAdapter.PostViewHolder>(options) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = LayoutPostOnlyListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -136,6 +135,6 @@ class HomePagingAdapter constructor(
     }
     
     companion object {
-        private const val TAG = "HomePagingAdapter"
+        private const val TAG = "HotPostsPagingAdapter"
     }
 }

@@ -126,7 +126,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.firebaseui:firebase-ui-firestore:7.1.1'
-
+    implementation 'com.google.firebase:firebase-functions-ktx'
+    
     // Paging
     implementation "androidx.paging:paging-runtime-ktx:$project.pagingVersion"
 

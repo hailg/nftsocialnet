@@ -12,6 +12,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.gingercake.nsn.R
+import com.gingercake.nsn.auth.AuthActivity
 import com.gingercake.nsn.databinding.ActivityMainBinding
 import com.gingercake.nsn.model.post.Post
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -34,6 +35,13 @@ class MainActivity : DaggerAppCompatActivity() {
         bottomNavView = binding.bottomNavView
         setupViews(binding)
         Log.d(TAG, "onCreate ${mainViewModel}")
+
+        intent.extras?.let {
+            for (key in it.keySet()) {
+                val value = intent.extras?.get(key)
+                Log.d(TAG, "Notification Key: $key Value: $value")
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -67,9 +75,9 @@ class MainActivity : DaggerAppCompatActivity() {
         val appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.homeFragment,
-                R.id.searchFragment,
                 R.id.hotPostsFragment,
                 R.id.profileFragment,
+                R.id.blockChainFragment,
                 R.id.postDetailFragment,
                 R.id.newPostFragment,
                 R.id.newPostSaleSettingFragment

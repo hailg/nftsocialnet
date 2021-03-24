@@ -25,8 +25,21 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
             .collection(Constants.COMMENTS_COLLECTION).document(commentId)
         db.runTransaction { transaction ->
             transaction.update(postRef, "commentCount", FieldValue.increment(1))
+            transaction.update(postRef, "rank", FieldValue.increment(5))
             transaction.set(commentRef, comment)
         }.await()
+    }
+
+    suspend fun viewPost(user: User, postId: String) {
+        db
+            .collection(Constants.POSTS_COLLECTION).document(postId)
+            .update(
+                mapOf(
+                    "views" to FieldValue.increment(1),
+                    "rank" to FieldValue.increment(1),
+                )
+            )
+            .await()
     }
 
     suspend fun likePost(user: User, postId: String) {
@@ -37,6 +50,7 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
 
         db.runTransaction{ transaction ->
             transaction.update(postRef, "likes", FieldValue.arrayUnion(user.uid))
+            transaction.update(postRef, "rank", FieldValue.increment(2))
             transaction.set(likeRef, Like(user.uid, user.name, user.photoUrl))
         }.await()
     }
@@ -50,6 +64,7 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
         db.runTransaction{ transaction ->
             transaction.delete(likeRef)
             transaction.update(postRef, "likes", FieldValue.arrayRemove(user.uid))
+            transaction.update(postRef, "rank", FieldValue.increment(-2))
         }.await()
     }
 

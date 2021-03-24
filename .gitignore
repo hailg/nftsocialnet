@@ -7,3 +7,4 @@ keystore
 ngrok
 nodeos.log
 **/*.log
+functions/.runtimeconfig.json

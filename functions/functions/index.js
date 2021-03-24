@@ -12,15 +12,9 @@ const transactionOptions = {
   expireSeconds: 30,
 };
 
-let privateKey = process.env["nsntoken_private_key"];
-const nsntokenConfig = functions.config().nsntoken;
-if (nsntokenConfig) {
-  privateKey = nsntokenConfig.private_key;
-}
-functions.logger.log("Private key", privateKey);
-
+const systemConfig = functions.config().nftsocialnet;
+const privateKey = systemConfig.nsn_private_key;
 const privateKeys = [privateKey];
-
 const signatureProvider = new JsSignatureProvider(privateKeys);
 const rpc = new JsonRpc(chainUri, { fetch });
 const api = new Api({
@@ -33,33 +27,40 @@ const api = new Api({
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-exports.userCreated = functions.auth.user().onCreate(async (user) => {
-  const fullName = user.displayName || "Anonymous";
-  const text = `Hello there ${fullName}`;
-  const payload = {
-    notification: {
-      title: "Welcome to NSN!",
-      body: text
-        ? text.length <= 100
-          ? text
-          : text.substring(0, 97) + "..."
-        : "",
-      click_action: `https://facebook.com`,
-    },
-  };
-  // Get the list of device tokens.
-  const allTokens = await admin.firestore().collection("fcmTokens").get();
-  const tokens = [];
-  allTokens.forEach((tokenDoc) => {
-    tokens.push(tokenDoc.id);
+exports.userWritten = functions.firestore
+  .document("/users/{userId}")
+  .onWrite(async (change, context) => {
+    const original = change.before.data();
+    const user = change.after.data();
+    if (!user) {
+      return;
+    }
+    if (original && original.fcmTokens && original.fcmTokens.length > 0) {
+      return;
+    }
+    let newTokens = user.fcmTokens;
+    if (!newTokens || newTokens.length == 0) {
+      return;
+    }
+    const fullName = user.name;
+    const text = `Hello there ${fullName}`;
+    const payload = {
+      notification: {
+        title: "Welcome to NSN!",
+        body: text
+          ? text.length <= 100
+            ? text
+            : text.substring(0, 97) + "..."
+          : "",
+      },
+      data: {
+        event: "New registration",
+      },
+    };
+    const response = await admin.messaging().sendToDevice(newTokens, payload);
+    await cleanupTokens(response, newTokens);
+    functions.logger.log("Notifications have been sent and tokens cleaned up.");
   });
-  if (tokens.length > 0) {
-    // Send notifications to all tokens.
-    const response = await admin.messaging().sendToDevice(tokens, payload);
-    await cleanupTokens(response, tokens);
-    console.log("Notifications have been sent and tokens cleaned up.");
-  }
-});
 
 function cleanupTokens(response, tokens) {
   // For each notification we check if there was an error.
@@ -67,7 +68,11 @@ function cleanupTokens(response, tokens) {
   response.results.forEach((result, index) => {
     const error = result.error;
     if (error) {
-      console.error("Failure sending notification to", tokens[index], error);
+      functions.logger.error(
+        "Failure sending notification to",
+        tokens[index],
+        error
+      );
       // Cleanup the tokens who are not registered anymore.
       if (
         error.code === "messaging/invalid-registration-token" ||
@@ -149,3 +154,5 @@ exports.postCreated = functions.firestore
     functions.logger.log("Result", result);
     return result;
   });
+
+exports.blockchain_account = require("./blockchain_accounts");

@@ -16,10 +16,14 @@ import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.auth.viewmodel.AuthViewModel
 import com.gingercake.nsn.auth.viewmodel.AuthViewModelFactory
 import com.gingercake.nsn.databinding.ActivityAuthBinding
+import com.gingercake.nsn.framework.Constants
 import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.model.user.User
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import dagger.android.support.DaggerAppCompatActivity
@@ -29,6 +33,9 @@ class AuthActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var authViewModelFactory: AuthViewModelFactory
     private lateinit var viewModel: AuthViewModel
+
+    @Inject
+    lateinit var db: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +78,26 @@ class AuthActivity : DaggerAppCompatActivity() {
                     user.photoUrl?.toString() ?: "")
                 SessionManager.currentUser = nsnUser
                 viewModel.saveUser(nsnUser)
+                Firebase.messaging.token.addOnCompleteListener(OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                        return@OnCompleteListener
+                    }
+
+                    // Get new FCM registration token
+                    val token = task.result
+                    db
+                        .collection(Constants.USERS_COLLECTION)
+                        .document(user.uid)
+                        .update("fcmTokens", FieldValue.arrayUnion(token))
+                        .addOnFailureListener {
+                            Log.w(TAG, "onUpdatingFCMToken: failed", it)
+                        }
+                        .addOnSuccessListener {
+                            Log.d(TAG, "onUpdatingFCMToken: Successful")
+                        }
+                })
+
                 Log.d(
                     TAG,
                     "OnActivityResult User ${user.email}, ${user.displayName}, ${user.photoUrl}"
