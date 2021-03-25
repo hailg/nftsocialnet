@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#0094DE</color>
-    <color name="colorPrimaryDark">#512DA8</color>
+    <color name="colorPrimary">#09A8D4</color>
+    <color name="colorPrimaryDark">#09A8D4</color>
     <color name="colorPrimaryLight">#EDE7F6</color>
     <color name="colorAccent">#7C4DFF</color>
     <color name="colorSecondary">#FFC107</color>
@@ -15,7 +15,8 @@
     <color name="white">#FFFFFFFF</color>
 
     <!-- Secondary theme colors -->
-    <color name="tealDark">#0094DE</color>
+    <color name="tealDark">#09A8D4</color>
+    <color name="tealDarkOld">#0094DE</color>
     <color name="tealLight">#9FDAF7</color>
     <color name="link_blue">#0000EE</color>
 

@@ -9,7 +9,7 @@ const { TextDecoder, TextEncoder } = require("util"); // node only
 const { user } = require("firebase-functions/lib/providers/auth");
 
 const IV_LENGTH = 16;
-const chainUri = "http://127.0.0.1:8888";
+const WELCOME_BONUS = "100.0000 NSN";
 const tokenAccount = "nsntoken";
 const eosAccount = "eosio";
 const transactionOptions = {
@@ -21,6 +21,7 @@ const systemConfig = functions.config().nftsocialnet;
 const systemEncryptionKey = systemConfig.system_encryption_key;
 const eosPrivateKey = systemConfig.eos_private_key;
 const nsnTokenPrivateKey = systemConfig.nsn_private_key;
+const chainUri = systemConfig.chain_uri;
 const rpc = new JsonRpc(chainUri, { fetch });
 const eosAPI = new Api({
   rpc,
@@ -95,7 +96,7 @@ const issueTokensToNewUser = async (username) => {
         data: {
           from: tokenAccount,
           to: username,
-          quantity: "100.0000 NSN",
+          quantity: WELCOME_BONUS,
           memo: "Welcome gift.",
         },
       },
@@ -177,6 +178,7 @@ const createAccount = async (userId, username, password) => {
   if (!username) {
     throw new functions.https.HttpsError(
       "invalid-argument",
+      "The username is not valid.",
       "The username is not valid."
     );
   }
@@ -193,7 +195,8 @@ const createAccount = async (userId, username, password) => {
       );
       throw new functions.https.HttpsError(
         "already-exists",
-        "the username is already existed"
+        "The username is already existed. Please choose another one!",
+        "The username is already existed. Please choose another one!"
       );
     } else {
       functions.logger.log(
@@ -206,7 +209,8 @@ const createAccount = async (userId, username, password) => {
       );
       throw new functions.https.HttpsError(
         "internal",
-        "failed to create blockchain user"
+        "Failed to create blockchain user. Please try again!",
+        "Failed to create blockchain user. Please try again!"
       );
     }
   }
@@ -217,7 +221,8 @@ const createAccount = async (userId, username, password) => {
     functions.logger.log("failed to issue welcome gift", userId, "error", e);
     throw new functions.https.HttpsError(
       "internal",
-      "failed to issue welcome gift"
+      "Failed to issue welcome gift. Please try again!",
+      "Failed to issue welcome gift. Please try again!"
     );
   }
 
@@ -226,6 +231,7 @@ const createAccount = async (userId, username, password) => {
     privateKeyIV: iv,
     privateKey: encryptedPK,
     publicKey: publicKey,
+    nsnAmount: WELCOME_BONUS,
   });
 };
 
@@ -240,48 +246,30 @@ exports.createAccount = functions.https.onCall(async (data, context) => {
   functions.logger.log("Callling user", uid);
   let username = data.username;
   let password = data.password;
-  try {
-    await createAccount(uid, username, password);
-  } catch (e) {
-    functions.logger.log(
-      "Failed to create block chain account for user",
-      uid,
-      "using username",
-      username,
-      e
-    );
-    if (e.json && e.json.code == "3050001") {
-      throw new functions.https.HttpsError(
-        "already-exists",
-        "the username is already existed"
-      );
-    } else {
-      throw new functions.https.HttpsError(
-        "internal",
-        "failed to create blockchain user"
-      );
-    }
-  }
+  await createAccount(uid, username, password);
   return {
     code: 200,
-    messagae: "success",
+    data: {
+      messagae: "success",
+      nsnAmount: WELCOME_BONUS,
+    },
   };
 });
 
-exports.createAccountTesting = functions.firestore
-  .document("/users/{userId}")
-  .onCreate(async (snap, context) => {
-    const newData = snap.data();
-    var publicKey = "";
-    try {
-      publicKey = await createAccount(
-        newData.uid,
-        newData.username,
-        newData.password
-      );
-    } catch (e) {}
-    functions.logger.log(`Returning ${publicKey}`);
-    return {
-      publicKey: publicKey,
-    };
-  });
+// exports.createAccountTesting = functions.firestore
+//   .document("/users/{userId}")
+//   .onCreate(async (snap, context) => {
+//     const newData = snap.data();
+//     var publicKey = "";
+//     try {
+//       publicKey = await createAccount(
+//         newData.uid,
+//         newData.username,
+//         newData.password
+//       );
+//     } catch (e) {}
+//     functions.logger.log(`Returning ${publicKey}`);
+//     return {
+//       publicKey: publicKey,
+//     };
+//   });

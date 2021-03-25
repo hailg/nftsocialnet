@@ -5,7 +5,9 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.request.RequestOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
@@ -31,10 +33,10 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideAppLogo(application: NSNApplication): Drawable {
-        return ContextCompat.getDrawable(application, R.drawable.logo)!!
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
-    
+
     @Singleton
     @Provides
     fun provideFirebaseStore(): FirebaseFirestore {
@@ -45,5 +47,11 @@ object AppModule {
     @Provides
     fun provideFirebaseStorage(): FirebaseStorage {
         return FirebaseStorage.getInstance()
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseFunction(): FirebaseFunctions {
+        return FirebaseFunctions.getInstance()
     }
 }

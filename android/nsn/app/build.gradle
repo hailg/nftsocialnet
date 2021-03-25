@@ -104,6 +104,7 @@ dependencies {
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$rootProject.navVersion"
 
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.22'
+    implementation 'nu.aaro.gustav:passwordstrengthmeter:0.4'
 
     // Dagger
     implementation "com.google.dagger:dagger:$rootProject.daggerVersion"

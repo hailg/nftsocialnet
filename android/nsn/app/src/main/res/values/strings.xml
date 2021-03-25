@@ -44,4 +44,13 @@
     <string name="fcm_message">NSN</string>
     <string name="block_chain">Blockchain</string>
     <string name="blockchain_data">Blockchain Data</string>
+    <string name="username">Username</string>
+    <string name="your_12_characters_username">Your 12 characters username</string>
+    <string name="username_hint">Please choose your block chain username. Only character from a to z and 1 to 5 can be used to form your 12-character username.</string>
+    <string name="password_hit">Please choose a password for your block chain wallet. You will need it to do any transactions later.</string>
+    <string name="register">Register</string>
+    <string name="your_password">Your password</string>
+    <string name="enter_your_password_again">Enter your password again</string>
+    <string name="accept">Accept</string>
+    <string name="retry">Retry!</string>
 </resources>
