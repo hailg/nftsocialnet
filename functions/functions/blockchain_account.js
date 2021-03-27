@@ -1,86 +1,19 @@
-const crypto = require("crypto");
 const functions = require("firebase-functions");
-const admin = require("firebase-admin");
 const ecc = require("eosjs-ecc");
-const { Api, JsonRpc, RpcError } = require("eosjs");
-const { JsSignatureProvider } = require("eosjs/dist/eosjs-jssig"); // development only
-const fetch = require("node-fetch"); // node only
-const { TextDecoder, TextEncoder } = require("util"); // node only
-const { user } = require("firebase-functions/lib/providers/auth");
+const admin = require("firebase-admin");
 
-const IV_LENGTH = 16;
-const WELCOME_BONUS = "100.0000 NSN";
-const tokenAccount = "nsntoken";
-const eosAccount = "eosio";
-const transactionOptions = {
-  blocksBehind: 3,
-  expireSeconds: 30,
-};
-const alphabet = new Set("12345abcdefghijklmnopqrstuvwxyz".split(""));
-const systemConfig = functions.config().nftsocialnet;
-const systemEncryptionKey = systemConfig.system_encryption_key;
-const eosPrivateKey = systemConfig.eos_private_key;
-const nsnTokenPrivateKey = systemConfig.nsn_private_key;
-const chainUri = systemConfig.chain_uri;
-const rpc = new JsonRpc(chainUri, { fetch });
-const eosAPI = new Api({
-  rpc,
-  signatureProvider: new JsSignatureProvider([eosPrivateKey]),
-  textDecoder: new TextDecoder(),
-  textEncoder: new TextEncoder(),
-});
-const nsnTokenAPI = new Api({
-  rpc,
-  signatureProvider: new JsSignatureProvider([nsnTokenPrivateKey]),
-  textDecoder: new TextDecoder(),
-  textEncoder: new TextEncoder(),
-});
+const {
+  eosAccount,
+  tokenAccount,
+  welcomeBonus,
+  eosAPI,
+  tokenAPI,
+  transactionOptions,
+  validateEOSName,
+  encryptPrivateKey,
+} = require("./utils");
 
-function getEncryptionKey(password) {
-  return crypto
-    .createHash("sha256")
-    .update(systemEncryptionKey + password)
-    .digest();
-}
-
-function encryptPrivateKey(privateKey, password) {
-  let encryptionKey = getEncryptionKey(password);
-  let iv = crypto.randomBytes(IV_LENGTH);
-  let cipher = crypto.createCipheriv("aes256", encryptionKey, iv);
-  return {
-    iv: iv.toString("hex"),
-    encryptedPK:
-      cipher.update(privateKey, "binary", "hex") + cipher.final("hex"),
-  };
-}
-
-function decryptPrivateKey(encryptedPrivateKey, iv, password) {
-  let encryptionKey = getEncryptionKey(password);
-  let decipher = crypto.createDecipheriv(
-    "aes256",
-    encryptionKey,
-    Buffer.from(iv, "hex")
-  );
-  return (
-    decipher.update(encryptedPrivateKey, "hex", "binary") +
-    decipher.final("binary")
-  );
-}
-
-function validateEOSName(username) {
-  if (!username || username.length != 12) {
-    return false;
-  }
-  validatingUsername = username.toLowerCase();
-  for (let c of validatingUsername) {
-    if (!alphabet.has(c)) {
-      return false;
-    }
-  }
-  return validatingUsername;
-}
-
-const issueTokensToNewUser = async (username) => {
+const issueBonusToNewUser = async (username) => {
   functions.logger.log("Issued token to", username);
   const transaction = {
     actions: [
@@ -96,13 +29,13 @@ const issueTokensToNewUser = async (username) => {
         data: {
           from: tokenAccount,
           to: username,
-          quantity: WELCOME_BONUS,
+          quantity: `${welcomeBonus} EOS`,
           memo: "Welcome gift.",
         },
       },
     ],
   };
-  const transactionResult = await nsnTokenAPI.transact(
+  const transactionResult = await tokenAPI.transact(
     transaction,
     transactionOptions
   );
@@ -112,12 +45,12 @@ const issueTokensToNewUser = async (username) => {
     "Transactioni result",
     transactionResult
   );
-  return transactionResult;
+  return transactionResult.transaction_id;
 };
 
 const createBlockchainAccount = async (username, publicKey) => {
   functions.logger.log("Creating user", username);
-  const transaction = {
+  let transaction = {
     actions: [
       {
         account: eosAccount,
@@ -167,7 +100,7 @@ const createBlockchainAccount = async (username, publicKey) => {
     "Transactioni result",
     transactionResult
   );
-  return transactionResult;
+  return transactionResult.transaction_id;
 };
 
 const createAccount = async (userId, username, password) => {
@@ -183,7 +116,13 @@ const createAccount = async (userId, username, password) => {
     );
   }
   try {
-    await createBlockchainAccount(username, publicKey);
+    let trxId = await createBlockchainAccount(username, publicKey);
+    await admin.firestore().collection("transactions").doc(trxId).set({
+      type: "userCreated",
+      id: trxId,
+      userId: userId,
+      timestamp: Date.now(),
+    });
   } catch (e) {
     if (e.json && e.json.error && e.json.error.code == "3050001") {
       functions.logger.log(
@@ -216,7 +155,22 @@ const createAccount = async (userId, username, password) => {
   }
 
   try {
-    await issueTokensToNewUser(username);
+    let issueTrxId = await issueBonusToNewUser(username);
+    await admin
+      .firestore()
+      .collection("transactions")
+      .doc(issueTrxId)
+      .set({
+        type: "eosReceived",
+        id: issueTrxId,
+        userId: userId,
+        timestamp: Date.now(),
+        data: {
+          from: tokenAccount,
+          quantity: `${welcomeBonus} EOS`,
+          memo: "Welcome gift.",
+        },
+      });
   } catch (e) {
     functions.logger.log("failed to issue welcome gift", userId, "error", e);
     throw new functions.https.HttpsError(
@@ -225,13 +179,12 @@ const createAccount = async (userId, username, password) => {
       "Failed to issue welcome gift. Please try again!"
     );
   }
-
   await admin.firestore().collection("users").doc(userId).update({
     username: username,
     privateKeyIV: iv,
     privateKey: encryptedPK,
     publicKey: publicKey,
-    nsnAmount: WELCOME_BONUS,
+    eosAmount: welcomeBonus,
   });
 };
 
@@ -243,16 +196,11 @@ exports.createAccount = functions.https.onCall(async (data, context) => {
     );
   }
   let uid = context.auth.uid;
-  functions.logger.log("Callling user", uid);
   let username = data.username;
   let password = data.password;
   await createAccount(uid, username, password);
   return {
     code: 200,
-    data: {
-      messagae: "success",
-      nsnAmount: WELCOME_BONUS,
-    },
   };
 });
 
