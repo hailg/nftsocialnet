@@ -13,63 +13,117 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
+            android:id="@+id/status"
+            android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_marginTop="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
 
             <TextView
-                android:id="@+id/sale_label"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/sale_switch"
-                android:layout_marginEnd="50dp"
-                android:text="@string/allow_other_user_to_buy_this_post_from_you"
-                android:textSize="18sp"
-                />
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/sale_switch"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:checked="false"
-                android:layout_centerVertical="true"
-                android:layout_alignParentEnd="true"
-                android:contentDescription="@string/allow_other_user_to_buy_this_post_from_you" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/sale_price"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@color/tealDark"
-            app:startIconDrawable="@drawable/ic_baseline_attach_money_24"
-            app:startIconContentDescription="@string/price_for_your_post"
-            app:suffixText="NSN"
-            app:startIconTint="@color/tealDark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/sale_price">
-
-            <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal"
-                />
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginVertical="10dp"
+                android:text="@string/working_on_your_post_please_wait"
+                android:textAlignment="center"
+                android:textSize="18sp"/>
 
-        </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/post_btn"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/post_form"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/post"
-            android:drawableEnd="@drawable/ic_baseline_navigate_next_24"
-            android:drawableTint="@color/grey1"
-            android:drawablePadding="0dp"
-            android:paddingHorizontal="20dp"
-            android:layout_gravity="right"
-            />
+            android:orientation="vertical">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/sale_label"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/sale_switch"
+                    android:layout_marginEnd="50dp"
+                    android:text="@string/allow_other_user_to_buy_this_post_from_you"
+                    android:textSize="18sp"
+                    />
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/sale_switch"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:checked="false"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:contentDescription="@string/allow_other_user_to_buy_this_post_from_you" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/sale_price"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:boxStrokeColor="@color/tealDark"
+                app:startIconDrawable="@drawable/ic_baseline_attach_money_24"
+                app:startIconContentDescription="@string/price_for_your_post"
+                app:suffixText="NSN"
+                app:startIconTint="@color/tealDark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/sale_price">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/password"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:startIconDrawable="@drawable/ic_baseline_lock_24"
+                app:startIconTint="@color/tealDark"
+                app:boxStrokeColor="@color/tealDark"
+                app:endIconMode="password_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/your_wallet_password">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:gravity="top"
+                    />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/post_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/post"
+                android:drawableEnd="@drawable/ic_baseline_navigate_next_24"
+                android:drawableTint="@color/grey1"
+                android:drawablePadding="0dp"
+                android:paddingHorizontal="20dp"
+                android:layout_gravity="right"
+                />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

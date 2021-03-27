@@ -8,12 +8,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gingercake.nsn.SessionManager
+import com.gingercake.nsn.auth.AuthActivity
 import com.gingercake.nsn.framework.Constants
 import com.gingercake.nsn.model.post.Post
 import com.gingercake.nsn.model.post.PostRepo
 import com.gingercake.nsn.model.user.User
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -25,7 +28,8 @@ import javax.inject.Inject
 data class CreatePostProgress(val state: Int,
                               val bytesTransferred: Long = 0,
                               val totalByteCount: Long = 0,
-                              val post: Post = Post()): Parcelable {
+                              val post: Post = Post(),
+                              val errorMessage: String = "Main"): Parcelable {
     companion object {
         const val UPLOADING = 0
         const val UPLOAD_PAUSED = 1
@@ -39,12 +43,13 @@ class MainViewModel @Inject constructor(
     private val storage: FirebaseStorage,
     private val db: FirebaseFirestore,
     private val postRepo: PostRepo,
+    private val functions: FirebaseFunctions,
 ): ViewModel() {
     private val _postCreationLiveData = MutableLiveData<CreatePostProgress>()
     val postCreationLiveData: LiveData<CreatePostProgress> = _postCreationLiveData
 
-    fun createPost(title: String, content: String,
-                   resourcePath: String, resourceType: Int, price: String) = viewModelScope.launch {
+    fun createPost(postId: String, title: String, content: String,
+                   resourcePath: String, resourceType: Int, price: String, password: String) = viewModelScope.launch {
         val resourceName = if (!resourcePath.isBlank()) {
             val file = Uri.fromFile(java.io.File(resourcePath))
             val dotIndex = resourcePath.lastIndexOf('.')
@@ -77,10 +82,33 @@ class MainViewModel @Inject constructor(
             uploadingName
         } else ""
 
-        val postId = UUID.randomUUID().toString().replace("-", "")
         val post = Post.newInstance(postId, title, content, resourceName, resourceType, price, SessionManager.currentUser)
         db.collection(Constants.POSTS_COLLECTION).document(postId).set(post, SetOptions.merge()).await()
+        val data = hashMapOf(
+                "postId" to postId,
+                "password" to password,
+        )
+        try {
+            functions
+                    .getHttpsCallable("blockchain_post-createPost")
+                    .call(data)
+                    .continueWith { task ->
+                        Log.d(AuthActivity.TAG, "" + task.result)
+                        task.result?.data
+                    }
+                    .await()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create post", e)
+            val msg = if (e is FirebaseFunctionsException) {
+                e.details.toString()
+            } else {
+                "Failed to create your post. Please try again!"
+            }
+            _postCreationLiveData.postValue(CreatePostProgress(CreatePostProgress.FAIL, post = post, errorMessage = msg))
+            return@launch
+        }
         _postCreationLiveData.postValue(CreatePostProgress(CreatePostProgress.SUCCESS, post = post))
+
     }
 
     fun viewPost(user: User, post: Post) {

@@ -6,12 +6,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.LayoutPostListItemBinding
 import com.gingercake.nsn.model.post.Post
@@ -119,7 +117,7 @@ class ProfilePagingAdapter (
                         }
                         if (item.price != "-1") {
                             binding.price.isVisible = true
-                            binding.price.text = "${item.price} NSN"
+                            binding.price.text = "${item.price} EOS"
                         } else {
                             binding.price.isVisible = false
                         }

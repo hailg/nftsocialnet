@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.system.Os.accept
 import android.util.Log
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -40,7 +39,6 @@ import kotlinx.coroutines.tasks.await
 import nu.aaro.gustav.passwordstrengthmeter.PasswordStrengthCalculator
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.HashMap
 
 class AuthActivity : DaggerAppCompatActivity() {
     @Inject
@@ -117,7 +115,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                 return@setOnClickListener
             }
             binding.form.isVisible = false
-            binding.progressBar.isVisible = true
+            binding.status.isVisible = true
             hideKeyboard(binding.password2)
             hideKeyboard(binding.password)
             hideKeyboard(binding.username)
@@ -127,20 +125,19 @@ class AuthActivity : DaggerAppCompatActivity() {
             )
             lifecycleScope.launch {
                 try {
-                    val ressult = functions
+                    functions
                         .getHttpsCallable("blockchain_account-createAccount")
                         .call(data)
                         .continueWith { task ->
                             Log.d(TAG, "" + task.result)
-                            task
-                            task.result?.data as Map<String, Objects>
+                            task.result?.data
                         }
                         .await()
-                    Log.d(TAG, "Result $ressult}")
+                    launchMainActivity()
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to create account", e)
                     binding.form.isVisible = true
-                    binding.progressBar.isVisible = false
+                    binding.status.isVisible = false
                     val msg = if (e is FirebaseFunctionsException) {
                         e.details.toString()
                     } else {
@@ -208,6 +205,8 @@ class AuthActivity : DaggerAppCompatActivity() {
 
         if (passwordTxt != password2Txt) {
             password2.error = "You'll need to retype the exact password"
+            password.editText?.setText("")
+            password2.editText?.setText("")
             return false
         }
         return true

@@ -15,11 +15,4 @@ open class BaseChildFragment : DaggerFragment() {
         (activity as MainActivity).showBottomNavigation()
         super.onDetach()
     }
-
-    fun createPost(title: String, content: String,
-                   resourcePath: String, resourceType: Int, price: String) {
-        activity?.let {
-            (activity as MainActivity).createPost(title, content, resourcePath, resourceType, price)
-        }
-    }
 }

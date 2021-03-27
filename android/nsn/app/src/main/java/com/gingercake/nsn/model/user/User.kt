@@ -9,7 +9,7 @@ data class User(
     val email: String,
     val name: String,
     val photoUrl: String,
-    val nsnAmount: String = "0",
+    val eosAmount: String = "0",
     val publicKey: String = "",
     val username: String = "",
 ) : Parcelable {
@@ -23,8 +23,6 @@ data class User(
     }
 
     override fun hashCode(): Int {
-        var result = uid.hashCode()
-        result = 31 * result + nsnAmount.hashCode()
-        return result
+        return uid.hashCode()
     }
 }

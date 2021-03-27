@@ -53,4 +53,8 @@
     <string name="enter_your_password_again">Enter your password again</string>
     <string name="accept">Accept</string>
     <string name="retry">Retry!</string>
+    <string name="linking_your_account_to_nsn_blockchain_please_wait">Linking your account to NSN blockchain. Please wait!</string>
+    <string name="your_wallet_password">Your wallet password</string>
+    <string name="please_enter_password_to_sell">Please enter your password to sell this post.</string>
+    <string name="working_on_your_post_please_wait">Working on your post. Please wait!</string>
 </resources>

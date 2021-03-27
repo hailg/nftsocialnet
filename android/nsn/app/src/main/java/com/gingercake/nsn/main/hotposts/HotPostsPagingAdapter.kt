@@ -93,7 +93,7 @@ class HotPostsPagingAdapter constructor(
                 }
                 if (item.price != "-1") {
                     binding.price.isVisible = true
-                    binding.price.text = "${item.price} NSN"
+                    binding.price.text = "${item.price} EOS"
                 } else {
                     binding.price.isVisible = false
                 }

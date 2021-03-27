@@ -12,9 +12,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.gingercake.nsn.R
-import com.gingercake.nsn.auth.AuthActivity
 import com.gingercake.nsn.databinding.ActivityMainBinding
-import com.gingercake.nsn.model.post.Post
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
@@ -95,9 +93,9 @@ class MainActivity : DaggerAppCompatActivity() {
         bottomNavView.visibility = View.GONE
     }
 
-    fun createPost(title: String, content: String,
-                   resourcePath: String, resourceType: Int, price: String) {
-        mainViewModel.createPost(title, content, resourcePath, resourceType, price)
+    fun createPost(postId: String, title: String, content: String,
+                   resourcePath: String, resourceType: Int, price: String, password: String) {
+        mainViewModel.createPost(postId, title, content, resourcePath, resourceType, price, password)
     }
 
     companion object {

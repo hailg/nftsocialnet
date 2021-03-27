@@ -80,7 +80,10 @@ class HomeFragment : DaggerFragment(), HomePagingAdapter.Listener {
         mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
             Log.d(TAG, "onPostCreation change: $it")
             when (it.state) {
-                CreatePostProgress.SUCCESS -> refresh()
+                CreatePostProgress.SUCCESS -> {
+                    refresh()
+                    binding.postRecyclerview.scrollToPosition(0)
+                }
                 CreatePostProgress.FAIL -> activity?.displayToast("Failed to create post. Please try again!")
             }
         })

@@ -5,6 +5,26 @@ import com.gingercake.nsn.model.user.User
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
+data class Transaction(
+        val id: String,
+        val type: String,
+        val userId: String,
+        val timestamp: Long,
+        val data: Map<String, String> = emptyMap()
+) : Parcelable {
+    constructor() : this("", "", "", 0)
+
+    companion object {
+        const val TRANSACTION_TYPE_USER_CREATED = "userCreated"
+        const val TRANSACTION_TYPE_EOS_RECEIVED = "eosReceived"
+        const val TRANSACTION_TYPE_EOS_SENT = "eosSent"
+        const val TRANSACTION_TYPE_NSN_ISSUED = "nsnIssued"
+        const val TRANSACTION_TYPE_NSN_LISTED = "nsnListed"
+        const val TRANSACTION_TYPE_NSN_PURCHASED = "nsnPurchased"
+    }
+}
+
+@Parcelize
 data class PostUser(
     val uid: String,
     val name: String,
@@ -48,10 +68,14 @@ data class Post(
     val views: Long = 0,
     val commentCount: Long = 0,
     val rank: Long = 0,
-    val price: String = "0.0",
+    val price: String = "-1",
     val owner: PostUser,
     val author: PostUser,
     val likes: List<String> = emptyList(),
+    val royalFee: Int = 5,
+    val dgoodId: Long = -1,
+    val dgoodName: String = "",
+    val dgoodBatchId: Long = -1,
 )  : Parcelable {
     constructor() : this("", "", "", "", 0, 0, 0, 0, 0, "0.0", PostUser(), PostUser(), emptyList())
 

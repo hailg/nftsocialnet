@@ -6,35 +6,48 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.gingercake.nsn.R
 import com.gingercake.nsn.databinding.FragmentNewPostSaleSettingBinding
 import com.gingercake.nsn.framework.BaseChildFragment
-import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.framework.hideKeyboard
 import com.gingercake.nsn.framework.showKeyboard
+import com.gingercake.nsn.main.CreatePostProgress
 import com.gingercake.nsn.main.MainActivity
+import com.gingercake.nsn.main.MainViewModel
+import com.gingercake.nsn.main.MainViewModelFactory
 import com.gingercake.nsn.model.post.Post
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.*
+import javax.inject.Inject
 
 class NewPostSaleSettingFragment : BaseChildFragment() {
+
+    @Inject
+    lateinit var mainViewModelFactory: MainViewModelFactory
+
+    private lateinit var mainViewModel: MainViewModel
 
     private lateinit var binding: FragmentNewPostSaleSettingBinding
     private lateinit var df: DecimalFormat
 
     private val args: NewPostSaleSettingFragmentArgs by navArgs()
+    private var creatingPostId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        df = DecimalFormat("#.####")
+        mainViewModel = ViewModelProvider(this, mainViewModelFactory).get(MainViewModel::class.java)
+        df = DecimalFormat("0.0000")
         df.roundingMode = RoundingMode.CEILING
         Log.d(TAG, "onCreate: ${args.postTitle}")
         Log.d(TAG, "onCreate: ${args.postContent}")
         Log.d(TAG, "onCreate: ${args.resourcePath}")
     }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,8 +55,10 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
     ): View? {
         binding = FragmentNewPostSaleSettingBinding.inflate(inflater, container, false)
         binding.salePrice.isVisible = false
+        binding.password.isVisible = false
         binding.saleSwitch.setOnCheckedChangeListener { buttonView, isChecked ->
             binding.salePrice.isVisible = isChecked
+            binding.password.isVisible = isChecked
             if (isChecked) {
                 binding.salePrice.requestFocus()
                 activity?.showKeyboard(binding.salePrice.editText)
@@ -53,7 +68,10 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
         }
         binding.postBtn.setOnClickListener {
             activity?.hideKeyboard(binding.salePrice)
+            binding.postForm.isVisible = false
+            binding.status.isVisible = true
             binding.salePrice.error = null
+            binding.password.error = null
             val price = if (binding.saleSwitch.isChecked) {
                 val userPriceText = binding.salePrice.editText?.text.toString()
                 val userPrice = userPriceText?.toDoubleOrNull()
@@ -63,17 +81,49 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                 }
                 df.format(userPrice)
             } else "-1"
-
+            val password = if (binding.saleSwitch.isChecked) {
+                val userPassword = binding.password.editText?.text.toString()
+                if (userPassword.isEmpty()) {
+                    binding.password.error = getString(R.string.please_enter_password_to_sell)
+                    return@setOnClickListener
+                }
+                userPassword
+            } else ""
+            creatingPostId =  UUID.randomUUID().toString().replace("-", "")
             (activity as MainActivity).createPost(
+                creatingPostId,
                 args.postTitle,
                 args.postContent,
                 args.resourcePath,
                 if (args.resourcePath.isBlank()) Post.TEXT_ONLY_TYPE else Post.IMAGE_TYPE,
-                price
+                price, password
             )
-            findNavController().popBackStack()
-            findNavController().popBackStack()
         }
+
+        mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
+            Log.d(TAG, "onPostCreation change: $it")
+            if (it.post.id == creatingPostId) {
+                return@observe
+            }
+            when (it.state) {
+                CreatePostProgress.SUCCESS -> {
+                    findNavController().popBackStack()
+                    findNavController().popBackStack()
+                }
+                CreatePostProgress.FAIL -> {
+                    binding.postForm.isVisible = true
+                    binding.status.isVisible = false
+                    activity?.let { activity ->
+                        MaterialAlertDialogBuilder(activity)
+                        .setTitle(resources.getString(R.string.app_name))
+                            .setMessage(it.errorMessage)
+                            .setPositiveButton(resources.getString(R.string.retry)) { _, _ ->
+                            }
+                            .show()
+                    }
+                }
+            }
+        })
         return binding.root
     }
 
