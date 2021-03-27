@@ -102,11 +102,12 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
 
         mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
             Log.d(TAG, "onPostCreation change: $it")
-            if (it.post.id == creatingPostId) {
+            if (it.post.id != creatingPostId) {
                 return@observe
             }
             when (it.state) {
                 CreatePostProgress.SUCCESS -> {
+                    creatingPostId = ""
                     findNavController().popBackStack()
                     findNavController().popBackStack()
                 }
@@ -114,6 +115,7 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                     binding.postForm.isVisible = true
                     binding.status.isVisible = false
                     activity?.let { activity ->
+                        creatingPostId = ""
                         MaterialAlertDialogBuilder(activity)
                         .setTitle(resources.getString(R.string.app_name))
                             .setMessage(it.errorMessage)
