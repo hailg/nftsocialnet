@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,8 +17,8 @@ import com.gingercake.nsn.databinding.FragmentHotPostsBinding
 import com.gingercake.nsn.framework.Constants
 import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.main.CreatePostProgress
+import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.main.MainViewModel
-import com.gingercake.nsn.main.MainViewModelFactory
 import com.gingercake.nsn.main.home.ui.HomeFragmentDirections
 import com.gingercake.nsn.model.post.Post
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,17 +32,13 @@ class HotPostsFragment : DaggerFragment(), HotPostsPagingAdapter.Listener {
 
     @Inject
     lateinit var db: FirebaseFirestore
-
-    @Inject
-    lateinit var mainViewModelFactory: MainViewModelFactory
-
     private lateinit var mainViewModel: MainViewModel
     private lateinit var binding: FragmentHotPostsBinding
     private lateinit var postAdapter: HotPostsPagingAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainViewModel = ViewModelProvider(this, mainViewModelFactory).get(MainViewModel::class.java)
+        mainViewModel = (activity as MainActivity).mainViewModel
         val query = db
             .collection(Constants.POSTS_COLLECTION)
             .orderBy("rank", Query.Direction.DESCENDING)
@@ -71,7 +66,7 @@ class HotPostsFragment : DaggerFragment(), HotPostsPagingAdapter.Listener {
         binding.postRecyclerview.layoutManager = LinearLayoutManager(context)
         binding.postRecyclerview.adapter = postAdapter
         binding.fab.setOnClickListener {
-            val action = HomeFragmentDirections.actionHomeFragmentToNewPostFragment()
+            val action = HotPostsFragmentDirections.actionHotPostsFragmentToNewPostFragment()
             findNavController().navigate(action)
         }
         binding.swipeRefresh.setOnRefreshListener {

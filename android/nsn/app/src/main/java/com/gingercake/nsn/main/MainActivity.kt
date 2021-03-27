@@ -23,7 +23,7 @@ class MainActivity : DaggerAppCompatActivity() {
 
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
-    private lateinit var mainViewModel: MainViewModel
+    lateinit var mainViewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,6 +96,10 @@ class MainActivity : DaggerAppCompatActivity() {
     fun createPost(postId: String, title: String, content: String,
                    resourcePath: String, resourceType: Int, price: String, password: String) {
         mainViewModel.createPost(postId, title, content, resourcePath, resourceType, price, password)
+    }
+
+    fun deletePost(postId: String) {
+        mainViewModel.deletePost(postId)
     }
 
     companion object {

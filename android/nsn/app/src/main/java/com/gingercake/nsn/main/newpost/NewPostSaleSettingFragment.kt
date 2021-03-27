@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.gingercake.nsn.R
@@ -16,8 +15,6 @@ import com.gingercake.nsn.framework.hideKeyboard
 import com.gingercake.nsn.framework.showKeyboard
 import com.gingercake.nsn.main.CreatePostProgress
 import com.gingercake.nsn.main.MainActivity
-import com.gingercake.nsn.main.MainViewModel
-import com.gingercake.nsn.main.MainViewModelFactory
 import com.gingercake.nsn.model.post.Post
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.math.RoundingMode
@@ -26,12 +23,6 @@ import java.util.*
 import javax.inject.Inject
 
 class NewPostSaleSettingFragment : BaseChildFragment() {
-
-    @Inject
-    lateinit var mainViewModelFactory: MainViewModelFactory
-
-    private lateinit var mainViewModel: MainViewModel
-
     private lateinit var binding: FragmentNewPostSaleSettingBinding
     private lateinit var df: DecimalFormat
 
@@ -40,7 +31,6 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainViewModel = ViewModelProvider(this, mainViewModelFactory).get(MainViewModel::class.java)
         df = DecimalFormat("0.0000")
         df.roundingMode = RoundingMode.CEILING
         Log.d(TAG, "onCreate: ${args.postTitle}")
@@ -100,7 +90,7 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
             )
         }
 
-        mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
+        (activity as MainActivity).mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
             Log.d(TAG, "onPostCreation change: $it")
             if (it.post.id != creatingPostId) {
                 return@observe
@@ -115,7 +105,7 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                     binding.postForm.isVisible = true
                     binding.status.isVisible = false
                     activity?.let { activity ->
-                        creatingPostId = ""
+//                        (activity as MainActivity).deletePost(creatingPostId)
                         MaterialAlertDialogBuilder(activity)
                         .setTitle(resources.getString(R.string.app_name))
                             .setMessage(it.errorMessage)
@@ -123,6 +113,7 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                             }
                             .show()
                     }
+                    creatingPostId = ""
                 }
             }
         })

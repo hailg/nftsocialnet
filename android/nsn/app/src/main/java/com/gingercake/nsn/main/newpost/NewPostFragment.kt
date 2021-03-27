@@ -9,11 +9,9 @@ import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.aminography.choosephotohelper.ChoosePhotoHelper
 import com.bumptech.glide.RequestManager
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.gingercake.nsn.R
 import com.gingercake.nsn.databinding.FragmentNewPostBinding
 import com.gingercake.nsn.framework.BaseChildFragment
-import com.gingercake.nsn.model.post.Post
 import javax.inject.Inject
 
 class NewPostFragment : BaseChildFragment() {
@@ -36,7 +34,6 @@ class NewPostFragment : BaseChildFragment() {
                     photoFile = it
                     requestManager
                         .load(it)
-                        .transition(DrawableTransitionOptions.withCrossFade())
                         .into(binding.postImage)
                 }
             }

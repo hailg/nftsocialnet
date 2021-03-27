@@ -255,7 +255,13 @@ const createPost = async (userId, post, password) => {
       code: 200,
     };
   } catch (e) {
-    await admin.firestore().collection("post").doc(post.id).delete();
+    functions.logger.log(
+      "Error creating post. Will delete this post",
+      post.id,
+      "error",
+      e
+    );
+    await admin.firestore().collection("posts").doc(post.id).delete();
     throw e;
   }
 };

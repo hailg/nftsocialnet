@@ -11,6 +11,7 @@ const {
   transactionOptions,
   validateEOSName,
   encryptPrivateKey,
+  rpc,
 } = require("./utils");
 
 const issueBonusToNewUser = async (username) => {
@@ -201,6 +202,24 @@ exports.createAccount = functions.https.onCall(async (data, context) => {
   await createAccount(uid, username, password);
   return {
     code: 200,
+  };
+});
+
+exports.getAccountBalance = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      "unauthenticated",
+      "The function must be called while authenticated.",
+      "The function must be called while authenticated."
+    );
+  }
+  let username = data.username;
+  const balance = await rpc.get_currency_balance(tokenAccount, username, "EOS");
+  return {
+    code: 200,
+    data: {
+      balance: balance,
+    },
   };
 });
 

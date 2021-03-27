@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestManager
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.LayoutPostListItemBinding
+import com.gingercake.nsn.main.MainViewModel
 import com.gingercake.nsn.model.post.Post
 import com.google.firebase.storage.FirebaseStorage
 
@@ -67,7 +68,10 @@ class ProfilePagingAdapter (
                         binding.postCardView.isVisible = false
                         binding.profileContainer.isVisible = true
 
-                        binding.nameField.text = item.owner.name
+                        binding.nameField.text = "${item.owner.name} (@${SessionManager.currentUser.username})"
+                        if (!SessionManager.currentUser.eosAmount.isEmpty()) {
+                            binding.balanceField.text = "${SessionManager.currentUser.eosAmount} EOS"
+                        }
                         requestManager
                             .load(item.owner.photoUrl)
                             .dontAnimate()

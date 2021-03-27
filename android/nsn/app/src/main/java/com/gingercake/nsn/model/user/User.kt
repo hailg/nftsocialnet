@@ -9,9 +9,9 @@ data class User(
     val email: String,
     val name: String,
     val photoUrl: String,
-    val eosAmount: String = "0",
+    var eosAmount: String = "0",
     val publicKey: String = "",
-    val username: String = "",
+    var username: String = "",
 ) : Parcelable {
     constructor() : this("", "", "", "")
 

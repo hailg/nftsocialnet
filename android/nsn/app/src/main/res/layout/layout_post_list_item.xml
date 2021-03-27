@@ -33,7 +33,7 @@
             android:layout_below="@+id/profile_image"
             android:includeFontPadding="false"
             android:textColor="@color/tealLight"
-            android:textSize="20sp" />
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/balance_field"
@@ -42,9 +42,9 @@
             android:layout_below="@id/name_field"
             android:layout_centerHorizontal="true"
             android:includeFontPadding="false"
-
+            android:layout_marginTop="5dp"
             android:textColor="@color/tealLight"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
     </RelativeLayout>
 
     <com.google.android.material.card.MaterialCardView

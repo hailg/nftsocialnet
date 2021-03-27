@@ -106,6 +106,13 @@ class PostRepo @Inject constructor(private val db: FirebaseFirestore) {
         }.await()
     }
 
+    suspend fun deletePost(postId: String) {
+        db
+                .collection(Constants.POSTS_COLLECTION)
+                .document(postId)
+                .delete().await()
+    }
+
     companion object {
         private const val TAG = "PostRepo"
     }

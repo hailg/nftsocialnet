@@ -133,6 +133,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                             task.result?.data
                         }
                         .await()
+                    SessionManager.currentUser.username = binding.username.editText?.text.toString()
                     launchMainActivity()
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to create account", e)

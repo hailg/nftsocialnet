@@ -23,6 +23,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.parcelize.Parcelize
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.HashMap
 
 @Parcelize
 data class CreatePostProgress(val state: Int,
@@ -46,8 +47,26 @@ class MainViewModel @Inject constructor(
     private val functions: FirebaseFunctions,
 ): ViewModel() {
     private val _postCreationLiveData = MutableLiveData<CreatePostProgress>()
+    private val _accountBalanceLiveData = MutableLiveData<String>()
     val postCreationLiveData: LiveData<CreatePostProgress> = _postCreationLiveData
+    val accountBalanceLiveData: LiveData<String> = _accountBalanceLiveData
 
+    fun getAccountBalance() = viewModelScope.launch {
+        try {
+            val balanceResponse = functions
+                    .getHttpsCallable("blockchain_account-getAccountBalance")
+                    .call(hashMapOf("username" to SessionManager.currentUser.username))
+                    .continueWith { task ->
+                        task.result?.data as HashMap<String, Object>
+                    }
+                    .await()
+            val balance = (balanceResponse["data"] as HashMap<String, Object>)["balance"] as String
+            _accountBalanceLiveData.postValue(balance)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to query account balance", e)
+        }
+    }
+    
     fun createPost(postId: String, title: String, content: String,
                    resourcePath: String, resourceType: Int, price: String, password: String) = viewModelScope.launch {
         val resourceName = if (!resourcePath.isBlank()) {
@@ -131,6 +150,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun deletePost(postId: String) {
+        viewModelScope.launch {
+            postRepo.deletePost(postId)
+        }
+    }
     companion object {
         private const val TAG = "NewPostViewModel"
     }

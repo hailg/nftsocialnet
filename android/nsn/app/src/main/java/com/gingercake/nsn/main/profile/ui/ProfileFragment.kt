@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -16,6 +15,7 @@ import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentProfileBinding
 import com.gingercake.nsn.framework.displayToast
 import com.gingercake.nsn.main.CreatePostProgress
+import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.main.MainViewModel
 import com.gingercake.nsn.main.MainViewModelFactory
 import com.gingercake.nsn.model.post.Post
@@ -47,7 +47,7 @@ class ProfileFragment : DaggerFragment(), ProfilePagingAdapter.Interaction {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel = ViewModelProvider(this, mainViewModelFactory).get(ProfileViewModel::class.java)
-        mainViewModel = ViewModelProvider(this, mainViewModelFactory).get(MainViewModel::class.java)
+        mainViewModel = (activity as MainActivity).mainViewModel
         owner = SessionManager.currentUser
         Log.d(TAG, "onCreate: viewModel $viewModel")
         Log.d(TAG, "onCreate: mainViewModel $mainViewModel")
@@ -64,6 +64,9 @@ class ProfileFragment : DaggerFragment(), ProfilePagingAdapter.Interaction {
             val action = ProfileFragmentDirections.actionProfileFragmentToNewPostFragment()
             findNavController().navigate(action)
         }
+        mainViewModel.accountBalanceLiveData.observe(viewLifecycleOwner, { balance ->
+            SessionManager.currentUser.eosAmount = balance
+        })
         mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
             Log.d(TAG, "onPostCreation change: $it")
             when (it.state) {
@@ -107,5 +110,6 @@ class ProfileFragment : DaggerFragment(), ProfilePagingAdapter.Interaction {
                 binding.swipeRefresh.isRefreshing = loadStates.refresh  is  LoadState.Loading
             }
         }
+        mainViewModel.getAccountBalance()
     }
 }
