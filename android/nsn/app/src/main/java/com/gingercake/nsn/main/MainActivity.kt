@@ -40,6 +40,7 @@ class MainActivity : DaggerAppCompatActivity() {
                 Log.d(TAG, "Notification Key: $key Value: $value")
             }
         }
+        mainViewModel.getAccountBalance()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -78,7 +79,8 @@ class MainActivity : DaggerAppCompatActivity() {
                 R.id.blockChainFragment,
                 R.id.postDetailFragment,
                 R.id.newPostFragment,
-                R.id.newPostSaleSettingFragment
+                R.id.newPostSaleSettingFragment,
+                R.id.purchasePostFragment
             )
         )
         NavigationUI.setupWithNavController(binding.bottomNavView, navController)
@@ -96,10 +98,6 @@ class MainActivity : DaggerAppCompatActivity() {
     fun createPost(postId: String, title: String, content: String,
                    resourcePath: String, resourceType: Int, price: String, password: String) {
         mainViewModel.createPost(postId, title, content, resourcePath, resourceType, price, password)
-    }
-
-    fun deletePost(postId: String) {
-        mainViewModel.deletePost(postId)
     }
 
     companion object {

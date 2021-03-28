@@ -33,9 +33,6 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
         super.onCreate(savedInstanceState)
         df = DecimalFormat("0.0000")
         df.roundingMode = RoundingMode.CEILING
-        Log.d(TAG, "onCreate: ${args.postTitle}")
-        Log.d(TAG, "onCreate: ${args.postContent}")
-        Log.d(TAG, "onCreate: ${args.resourcePath}")
     }
 
     override fun onCreateView(
@@ -58,8 +55,6 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
         }
         binding.postBtn.setOnClickListener {
             activity?.hideKeyboard(binding.salePrice)
-            binding.postForm.isVisible = false
-            binding.status.isVisible = true
             binding.salePrice.error = null
             binding.password.error = null
             val price = if (binding.saleSwitch.isChecked) {
@@ -79,6 +74,8 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
                 }
                 userPassword
             } else ""
+            binding.postForm.isVisible = false
+            binding.status.isVisible = true
             creatingPostId =  UUID.randomUUID().toString().replace("-", "")
             (activity as MainActivity).createPost(
                 creatingPostId,

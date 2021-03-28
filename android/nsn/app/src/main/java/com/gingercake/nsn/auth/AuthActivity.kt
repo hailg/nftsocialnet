@@ -1,7 +1,6 @@
 package com.gingercake.nsn.auth
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
@@ -12,7 +11,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.IdpResponse
+import com.gingercake.nsn.BuildConfig
 import com.gingercake.nsn.R
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.auth.viewmodel.AuthViewModel
@@ -27,6 +28,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
@@ -39,6 +41,7 @@ import kotlinx.coroutines.tasks.await
 import nu.aaro.gustav.passwordstrengthmeter.PasswordStrengthCalculator
 import java.util.*
 import javax.inject.Inject
+import kotlin.math.log
 
 class AuthActivity : DaggerAppCompatActivity() {
     @Inject
@@ -96,10 +99,11 @@ class AuthActivity : DaggerAppCompatActivity() {
         override fun onPasswordAccepted(password: String?) {}
 
     }
+    private lateinit var binding: ActivityAuthBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityAuthBinding.inflate(layoutInflater)
+        binding = ActivityAuthBinding.inflate(layoutInflater)
         setContentView(binding.root)
         viewModel = ViewModelProvider(this, authViewModelFactory).get(AuthViewModel::class.java)
         binding.passwordInputMeter.setEditText(binding.password.editText)
@@ -153,36 +157,38 @@ class AuthActivity : DaggerAppCompatActivity() {
                 }
             }
         }
-        auth.addAuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user == null) {
-                login()
-            } else {
-                lifecycleScope.launch {
-                    try {
-                        var nsnUser = FirebaseFirestore
-                                .getInstance().collection(Constants.USERS_COLLECTION)
-                                .document(user.uid)
-                                .get().await().toObject(User::class.java)
-                        if (nsnUser == null) {
-                            nsnUser = User(user.uid,
-                                    user.email ?: "",
-                                    user.displayName ?: "",
-                                    user.photoUrl?.toString() ?: "")
-                            viewModel.saveUser(nsnUser)
-                        }
-                        SessionManager.currentUser = nsnUser
-                        registerFCM(nsnUser);
-                        if (nsnUser.username.isEmpty()) {
-                            binding.scrollView.isVisible = true;
-                        } else {
-                            launchMainActivity()
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to sign you in. Please try again!", e)
-                        login();
-                    }
+        val user = auth.currentUser
+        if (user == null) {
+            login()
+        } else {
+            userSignedIn(user)
+        }
+    }
+
+    private fun userSignedIn(user: FirebaseUser) {
+        lifecycleScope.launch {
+            try {
+                var nsnUser = FirebaseFirestore
+                    .getInstance().collection(Constants.USERS_COLLECTION)
+                    .document(user.uid)
+                    .get().await().toObject(User::class.java)
+                if (nsnUser == null) {
+                    nsnUser = User(user.uid,
+                        user.email ?: "",
+                        user.displayName ?: "",
+                        user.photoUrl?.toString() ?: "")
+                    viewModel.saveUser(nsnUser)
                 }
+                SessionManager.currentUser = nsnUser
+                registerFCM(nsnUser);
+                if (nsnUser.username.isEmpty()) {
+                    binding.scrollView.isVisible = true;
+                } else {
+                    launchMainActivity()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to sign you in. Please try again!", e)
+                login();
             }
         }
     }
@@ -278,22 +284,26 @@ class AuthActivity : DaggerAppCompatActivity() {
                 }
     }
 
-    override fun onResume() {
-        super.onResume()
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null) {
-            login()
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == RC_SIGN_IN) {
-            val response = IdpResponse.fromResultIntent(data)
-            if (resultCode != Activity.RESULT_OK) {
-                this.displayToast(R.string.sign_in_error)
-                Log.d(TAG, "Login failed", response?.error)
+            val user = auth.currentUser
+            if (user != null) {
+                userSignedIn(user)
+                return
             }
+            val response = IdpResponse.fromResultIntent(data)
+            if (response == null) { // User pressed back button
+                Log.d(TAG, "User press back button. Try to login again.")
+                login()
+                return
+            }
+            Log.e(TAG, "Failed to login$response", response.error)
+            if (response.error?.errorCode == ErrorCodes.NO_NETWORK) {
+                this.displayToast("Please check your network connection!")
+                return;
+            }
+            this.displayToast("Unknown error. Please try again!")
         }
     }
 
@@ -308,6 +318,7 @@ class AuthActivity : DaggerAppCompatActivity() {
                         .setAvailableProviders(providers)
                         .setLogo(R.mipmap.logo)
                         .setTheme(R.style.LoginTheme)
+                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                         .build(),
                 RC_SIGN_IN
         )

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -77,6 +78,16 @@
                 android:adjustViewBounds="true"
                 android:padding="0dp"
                 android:scaleType="fitCenter" />
+
+            <TextView
+                android:id="@+id/post_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:maxLines="6"
+                android:ellipsize="end"
+                android:textColor="#000"
+                android:textSize="15sp" />
 
             <RelativeLayout
                 android:layout_width="match_parent"

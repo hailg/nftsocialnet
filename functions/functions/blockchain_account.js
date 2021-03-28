@@ -126,7 +126,7 @@ const createAccount = async (userId, username, password) => {
     });
   } catch (e) {
     if (e.json && e.json.error && e.json.error.code == "3050001") {
-      functions.logger.log(
+      functions.logger.error(
         "Failed to create block chain account for user",
         userId,
         "using username",
@@ -139,7 +139,7 @@ const createAccount = async (userId, username, password) => {
         "The username is already existed. Please choose another one!"
       );
     } else {
-      functions.logger.log(
+      functions.logger.error(
         "Failed to create block chain account for user",
         userId,
         "using username",
@@ -173,7 +173,7 @@ const createAccount = async (userId, username, password) => {
         },
       });
   } catch (e) {
-    functions.logger.log("failed to issue welcome gift", userId, "error", e);
+    functions.logger.error("failed to issue welcome gift", userId, "error", e);
     throw new functions.https.HttpsError(
       "internal",
       "Failed to issue welcome gift. Please try again!",
@@ -185,7 +185,6 @@ const createAccount = async (userId, username, password) => {
     privateKeyIV: iv,
     privateKey: encryptedPK,
     publicKey: publicKey,
-    eosAmount: welcomeBonus,
   });
 };
 
@@ -218,7 +217,7 @@ exports.getAccountBalance = functions.https.onCall(async (data, context) => {
   return {
     code: 200,
     data: {
-      balance: balance,
+      balance: balance[0],
     },
   };
 });

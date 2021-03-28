@@ -181,6 +181,7 @@ const listNSNForSale = async (user, userAPI, postId, dgoodId, price) => {
 };
 
 const createPost = async (userId, post, password) => {
+  functions.logger.log(userId, "Creating post", post.id);
   let user = await (
     await admin.firestore().collection("users").doc(userId).get()
   ).data();
@@ -198,8 +199,7 @@ const createPost = async (userId, post, password) => {
     await admin
       .firestore()
       .collection("transactions")
-      .doc(trxId)
-      .set({
+      .add({
         type: "nsnIssued",
         trxId: trxId,
         userId: userId,
@@ -227,8 +227,7 @@ const createPost = async (userId, post, password) => {
       await admin
         .firestore()
         .collection("transactions")
-        .doc(saleResult.trxId)
-        .set({
+        .add({
           type: "nsnListed",
           trxId: saleResult.trxId,
           userId: userId,
@@ -237,6 +236,7 @@ const createPost = async (userId, post, password) => {
             postId: post.id,
             username: user.username,
             postTitle: post.title,
+            postContent: post.content,
             postResource: post.resource,
             postResourceType: `${post.resourceType}`,
             dgoodId: dgoodId,
@@ -251,11 +251,8 @@ const createPost = async (userId, post, password) => {
       dgoodName: dgoodName,
       dgoodBatchId: dgoodBatchId,
     });
-    return {
-      code: 200,
-    };
   } catch (e) {
-    functions.logger.log(
+    functions.logger.error(
       "Error creating post. Will delete this post",
       post.id,
       "error",
@@ -264,9 +261,13 @@ const createPost = async (userId, post, password) => {
     await admin.firestore().collection("posts").doc(post.id).delete();
     throw e;
   }
+  functions.logger.log(userId, "Created post", post.id);
+  return {
+    code: 200,
+  };
 };
 
-const purchaseNSN = async (user, password, batchId, price) => {
+const purchaseNSN = async (user, userAPI, batchId, price) => {
   functions.logger.log(
     "Purchasing NSN",
     user.username,
@@ -276,7 +277,6 @@ const purchaseNSN = async (user, password, batchId, price) => {
     price
   );
   let username = user.username;
-  let userAPI = createEOSApi(user, password);
   const transaction = {
     actions: [
       {
@@ -311,47 +311,256 @@ const purchaseNSN = async (user, password, batchId, price) => {
     "transaction result",
     transactionResult
   );
-  let latestNSN = await rpc.get_table_rows({
-    json: true,
-    code: dgoodsAccount,
-    scope: username,
-    table: "accounts",
-    limit: 1,
-    reverse: true,
-  });
-  functions.logger.log(
-    "Latest NSN",
-    user.username,
-    "batch id",
-    batchId,
-    "price",
-    price,
-    "NSN",
-    latestNSN
-  );
   return {
-    trxId: transactionResult.transaction_id,
-    dgoodName: latestNSN.rows[0].token_name,
+    transactionResult: transactionResult,
   };
 };
 
-const purchasePost = async (userId, post, password) => {
+const purchasePost = async (userId, post, password, newPrice) => {
+  functions.logger.log(
+    userId,
+    "Purchasing post",
+    post.id,
+    ". New price",
+    newPrice
+  );
   let user = await (
     await admin.firestore().collection("users").doc(userId).get()
   ).data();
+  let userAPI = createEOSApi(user, password);
+  var purchase = null;
+  try {
+    purchase = await purchaseNSN(user, userAPI, post.dgoodBatchId, post.price);
+  } catch (e) {
+    if (e.json) {
+      var msg = "Cannot purchase this NSN post. Please try again!";
+      functions.logger.error(
+        "Failed to purchase post for user",
+        userId,
+        "post",
+        post.id,
+        "error json",
+        e.json
+      );
+      if (e.json.error && e.json.error.details) {
+        msg = `Cannot purchase this NSN post. Block chain error ${e.json.error.details[0].message}`;
+      }
+      throw new functions.https.HttpsError("internal", msg, msg);
+    } else {
+      functions.logger.error(
+        "Failed to purchase post for user",
+        userId,
+        "post",
+        post.id,
+        "error",
+        e
+      );
+      throw new functions.https.HttpsError(
+        "internal",
+        "Cannot purchase this NSN post. Please try again!",
+        "Cannot purchase this NSN post. Please try again!"
+      );
+    }
+  }
+
+  await admin
+    .firestore()
+    .collection("posts")
+    .doc(post.id)
+    .update({
+      owner: {
+        name: user.name,
+        photoUrl: user.photoUrl,
+        uid: user.uid,
+      },
+      price: newPrice,
+    });
 
   let postOwnerId = post.owner.uid;
+  let postOwnerName = post.owner.name;
+  let postOwnerPhoto = post.owner.photoUrl;
   let postAuthorId = post.author.uid;
-  let purchase = await purchaseNSN(
-    user,
-    password,
-    post.dgoodBatchId,
-    post.price
+  let postAuthorName = post.author.name;
+  let postAuthorPhoto = post.author.photoUrl;
+  let purchaseTransactionResult = purchase.transactionResult;
+  await admin
+    .firestore()
+    .collection("transactions")
+    .add({
+      type: "nsnPurchased",
+      trxId: purchaseTransactionResult.transaction_id,
+      userId: userId,
+      timestamp: Date.now(),
+      data: {
+        postId: post.id,
+        ownerName: postOwnerName,
+        ownerPhoto: postOwnerPhoto,
+        authorId: postAuthorId,
+        authorName: postAuthorName,
+        authorPhoto: postAuthorPhoto,
+        buyerId: userId,
+        buyerName: user.name,
+        buyerPhoto: user.photoUrl,
+        postTitle: post.title,
+        postContent: post.content,
+        postResource: post.resource,
+        postResourceType: `${post.resourceType}`,
+        dgoodId: post.dgoodId,
+        dgoodName: post.dgoodName,
+        dgoodBatchId: post.dgoodBatchId,
+        price: post.price,
+      },
+    });
+
+  await admin
+    .firestore()
+    .collection("transactions")
+    .add({
+      type: "nsnSold",
+      trxId: purchaseTransactionResult.transaction_id,
+      userId: postOwnerId,
+      timestamp: Date.now(),
+      data: {
+        postId: post.id,
+        ownerName: postOwnerName,
+        ownerPhoto: postOwnerPhoto,
+        authorId: postAuthorId,
+        authorName: postAuthorName,
+        authorPhoto: postAuthorPhoto,
+        buyerId: userId,
+        buyerName: user.name,
+        buyerPhoto: user.photoUrl,
+        postTitle: post.title,
+        postContent: post.content,
+        postResource: post.resource,
+        postResourceType: `${post.resourceType}`,
+        dgoodId: post.dgoodId,
+        dgoodName: post.dgoodName,
+        dgoodBatchId: post.dgoodBatchId,
+        price: post.price,
+      },
+    });
+
+  if (postAuthorId != postOwnerId) {
+    let purchaseActions =
+      purchaseTransactionResult.processed.action_traces[0].inline_traces;
+    for (let action of purchaseActions) {
+      let actionName = action.act.name;
+      if (actionName === "transfer") {
+        let actData = action.act.data;
+        if (actData.from === dgoodsAccount && actData.to === postAuthorId) {
+          await admin
+            .firestore()
+            .collection("transactions")
+            .add({
+              type: "nsnRoyalFee",
+              trxId: purchaseTransactionResult.transaction_id,
+              userId: postAuthorId,
+              timestamp: Date.now(),
+              data: {
+                postId: post.id,
+                ownerName: postOwnerName,
+                ownerPhoto: postOwnerPhoto,
+                authorId: postAuthorId,
+                authorName: postAuthorName,
+                authorPhoto: postAuthorPhoto,
+                buyerId: userId,
+                buyerName: user.name,
+                buyerPhoto: user.photoUrl,
+                postTitle: post.title,
+                postContent: post.content,
+                postResource: post.resource,
+                postResourceType: `${post.resourceType}`,
+                dgoodId: post.dgoodId,
+                dgoodName: post.dgoodName,
+                dgoodBatchId: post.dgoodBatchId,
+                price: post.price,
+                amount: actData.quantity.replace(" EOS", ""),
+              },
+            });
+          break;
+        }
+      }
+    }
+  }
+
+  var saleResult = null;
+  try {
+    saleResult = await listNSNForSale(
+      user,
+      userAPI,
+      post.id,
+      post.dgoodId,
+      newPrice
+    );
+  } catch (e) {
+    await admin.firestore().collection("posts").doc(post.id).update({
+      dgoodBatchId: -1,
+      price: "-1",
+    });
+    if (e.json) {
+      var msg = "Cannot list your NSN post to resell.";
+      functions.logger.error(
+        "Failed to relist post for user",
+        userId,
+        "post",
+        post.id,
+        "error json",
+        e.json
+      );
+      if (e.json.error && e.json.error.details) {
+        msg = `Cannot list your NSN poto to resell. Block chain error ${e.json.error.details[0].message}`;
+      }
+      throw new functions.https.HttpsError("internal", msg, msg);
+    } else {
+      functions.logger.error(
+        "Failed to re-list post for user",
+        userId,
+        "post",
+        post.id,
+        "error",
+        e
+      );
+      throw new functions.https.HttpsError(
+        "internal",
+        "Cannot list your NSN post to resell!",
+        "Cannot list your NSN post to resell!"
+      );
+    }
+  }
+
+  let dgoodBatchId = saleResult.dgoodBatchId;
+  await admin
+    .firestore()
+    .collection("transactions")
+    .add({
+      type: "nsnListed",
+      trxId: saleResult.trxId,
+      userId: userId,
+      timestamp: Date.now(),
+      data: {
+        postId: post.id,
+        username: user.username,
+        postTitle: post.title,
+        postContent: post.content,
+        postResource: post.resource,
+        postResourceType: `${post.resourceType}`,
+        dgoodId: post.dgoodId,
+        dgoodName: post.dgoodName,
+        dgoodBatchId: dgoodBatchId,
+        price: newPrice,
+      },
+    });
+  await admin.firestore().collection("posts").doc(post.id).update({
+    dgoodBatchId: dgoodBatchId,
+  });
+  functions.logger.log(
+    userId,
+    "Purchased post",
+    post.id,
+    ". New price",
+    newPrice
   );
-  let trxId = purchase.trxId;
-  let transaction = await rpc.history_get_transaction(trxId);
-  let actions = transaction.trx.trx.actions;
-  functions.logger.log("purchase actions", actions);
   return {
     code: 200,
   };
@@ -389,6 +598,7 @@ exports.purchasePost = functions.https.onCall(async (data, context) => {
   }
   let uid = context.auth.uid;
   let postId = data.postId;
+  let newPrice = data.newPrice;
   let password = data.password;
   let post = await (
     await admin.firestore().collection("posts").doc(postId).get()
@@ -399,5 +609,5 @@ exports.purchasePost = functions.https.onCall(async (data, context) => {
       "Cannot purchase. You're already the owner of this NSN post."
     );
   }
-  return await purchasePost(uid, post, password);
+  return await purchasePost(uid, post, password, newPrice);
 });

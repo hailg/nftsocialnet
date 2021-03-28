@@ -8,6 +8,7 @@ import com.gingercake.nsn.main.postdetail.PostDetailFragment
 import com.gingercake.nsn.main.profile.ui.ProfileFragment
 import com.gingercake.nsn.main.profile.di.ProfileScope
 import com.gingercake.nsn.main.profile.di.ProfileViewModelModule
+import com.gingercake.nsn.main.purchasepost.PurchasePostFragment
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
@@ -33,4 +34,7 @@ abstract class MainFragmentBuildersModule {
 
     @ContributesAndroidInjector
     abstract fun contributeHotPostFragment(): HotPostsFragment
+
+    @ContributesAndroidInjector
+    abstract fun contributePurchasePostFragment(): PurchasePostFragment
 }

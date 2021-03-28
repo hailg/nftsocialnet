@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
+import com.gingercake.nsn.R
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentHotPostsBinding
 import com.gingercake.nsn.framework.Constants
@@ -21,6 +22,7 @@ import com.gingercake.nsn.main.MainActivity
 import com.gingercake.nsn.main.MainViewModel
 import com.gingercake.nsn.main.home.ui.HomeFragmentDirections
 import com.gingercake.nsn.model.post.Post
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import dagger.android.support.DaggerFragment
@@ -124,8 +126,31 @@ class HotPostsFragment : DaggerFragment(), HotPostsPagingAdapter.Listener {
         }
     }
 
-    override fun onItemBuying(position: Int, item: Post) {
-
+    override fun onItemBuying(position: Int, post: Post) {
+        if (post.price == "-1") {
+            activity?.let { activity ->
+                MaterialAlertDialogBuilder(activity)
+                    .setTitle(resources.getString(R.string.app_name))
+                    .setMessage("Sorry, this item is not on sale!")
+                    .setPositiveButton(resources.getString(R.string.okay)) { _, _ ->
+                    }
+                    .show()
+            }
+            return
+        }
+        if (post.price.toDouble() > SessionManager.currentUser.eosAmount.toDouble()) {
+            activity?.let { activity ->
+                MaterialAlertDialogBuilder(activity)
+                    .setTitle(resources.getString(R.string.app_name))
+                    .setMessage("Sorry, you don't have enough EOS to buy this NSN post.")
+                    .setPositiveButton(resources.getString(R.string.okay)) { _, _ ->
+                    }
+                    .show()
+            }
+            return
+        }
+        val action = HotPostsFragmentDirections.actionHotPostsFragmentToPurchasePostFragment(post.id)
+        findNavController().navigate(action)
     }
 
     private fun refresh() {

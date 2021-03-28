@@ -17,10 +17,11 @@ data class Transaction(
     companion object {
         const val TRANSACTION_TYPE_USER_CREATED = "userCreated"
         const val TRANSACTION_TYPE_EOS_RECEIVED = "eosReceived"
-        const val TRANSACTION_TYPE_EOS_SENT = "eosSent"
         const val TRANSACTION_TYPE_NSN_ISSUED = "nsnIssued"
         const val TRANSACTION_TYPE_NSN_LISTED = "nsnListed"
         const val TRANSACTION_TYPE_NSN_PURCHASED = "nsnPurchased"
+        const val TRANSACTION_TYPE_NSN_SOLD = "nsnSold"
+        const val TRANSACTION_TYPE_NSN_ROYAL_FEE = "nsnRoyalFee"
     }
 }
 
@@ -86,7 +87,10 @@ data class Post(
         const val LINK_TYPE = 3
         const val TEXT_ONLY_TYPE = 4
 
-        val NO_POST_MARKER = Post()
+        val NO_POST_MARKER = Post("", "",
+            "", "", Post.NO_POST_TYPE,
+            0, 0, 0,0, "0.0", PostUser(), PostUser(), emptyList()
+        )
 
         fun profilePostForUser(user: User) = Post("", "",
             "", "", Post.PROFILE_HEADER_TYPE,

@@ -25,6 +25,13 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_homeFragment_to_purchasePostFragment"
+            app:destination="@id/purchasePostFragment"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/hotPostsFragment"
@@ -47,6 +54,14 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_hotPostsFragment_to_purchasePostFragment"
+            app:destination="@id/purchasePostFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpToInclusive="true"/>
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
@@ -78,7 +93,6 @@
         tools:layout="@layout/fragment_post_detail">
 
         <argument android:name="postId" app:argType="string" />
-
     </fragment>
     <fragment
         android:id="@+id/newPostFragment"
@@ -110,4 +124,11 @@
         android:name="com.gingercake.nsn.main.blockchain.BlockChainFragment"
         android:label="@string/block_chain"
         tools:layout="@layout/fragment_block_chain" />
+    <fragment
+        android:id="@+id/purchasePostFragment"
+        android:name="com.gingercake.nsn.main.purchasepost.PurchasePostFragment"
+        android:label="Purchase NSN post"
+        tools:layout="@layout/fragment_purchase_post">
+        <argument android:name="postId" app:argType="string" />
+    </fragment>
 </navigation>

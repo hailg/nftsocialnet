@@ -48,8 +48,11 @@ class MainViewModel @Inject constructor(
 ): ViewModel() {
     private val _postCreationLiveData = MutableLiveData<CreatePostProgress>()
     private val _accountBalanceLiveData = MutableLiveData<String>()
+    private val _purchaseLiveData = MutableLiveData<CreatePostProgress>()
+
     val postCreationLiveData: LiveData<CreatePostProgress> = _postCreationLiveData
     val accountBalanceLiveData: LiveData<String> = _accountBalanceLiveData
+    val purchaseLiveData: LiveData<CreatePostProgress> = _purchaseLiveData
 
     fun getAccountBalance() = viewModelScope.launch {
         try {
@@ -60,13 +63,17 @@ class MainViewModel @Inject constructor(
                         task.result?.data as HashMap<String, Object>
                     }
                     .await()
-            val balance = (balanceResponse["data"] as HashMap<String, Object>)["balance"] as String
+            var balance = (balanceResponse["data"] as HashMap<String, Object>)["balance"] as String
+            if (balance.endsWith("EOS")) {
+               balance = balance.replace("EOS", "").trim()
+            }
+            SessionManager.currentUser.eosAmount = balance
             _accountBalanceLiveData.postValue(balance)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to query account balance", e)
         }
     }
-    
+
     fun createPost(postId: String, title: String, content: String,
                    resourcePath: String, resourceType: Int, price: String, password: String) = viewModelScope.launch {
         val resourceName = if (!resourcePath.isBlank()) {
@@ -150,9 +157,27 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun deletePost(postId: String) {
-        viewModelScope.launch {
-            postRepo.deletePost(postId)
+    fun purchasePost(post: Post, newPrice: String, password: String) = viewModelScope.launch {
+        try {
+            functions
+                    .getHttpsCallable("blockchain_post-purchasePost")
+                    .call(hashMapOf(
+                            "postId" to post.id,
+                            "newPrice" to newPrice,
+                            "password" to password
+                    ))
+                    .continueWith { task ->
+                        task.result?.data                    }
+                    .await()
+            _purchaseLiveData.postValue(CreatePostProgress(CreatePostProgress.SUCCESS, post = post))
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to purchase post", e)
+            val msg = if (e is FirebaseFunctionsException) {
+                e.details.toString()
+            } else {
+                "Failed to purchase this post. Please try again!"
+            }
+            _purchaseLiveData.postValue(CreatePostProgress(CreatePostProgress.FAIL, post = post, errorMessage = msg))
         }
     }
     companion object {

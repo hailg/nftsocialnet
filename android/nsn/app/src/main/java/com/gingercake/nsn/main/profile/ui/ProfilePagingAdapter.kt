@@ -77,6 +77,11 @@ class ProfilePagingAdapter (
                             .dontAnimate()
                             .into(binding.profileImage)
                     }
+                    Post.NO_POST_TYPE -> {
+                        binding.postCardView.isVisible = false
+                        binding.profileContainer.isVisible = false
+                        binding.noPostPlaceHolder.isVisible = true
+                    }
                     else -> {
                         requestManager
                             .load(item.owner.photoUrl)

@@ -32,7 +32,7 @@ class ProfilePostFirestorePagingSource @Inject constructor(
             if (currentTime == maxTimestamp) { // Add marker for profile header
                 posts.add(0, Post.profilePostForUser(owner))
                 if (posts.size == 1) { // Add marker for user has no post
-                    posts.add(0, Post.NO_POST_MARKER)
+                    posts.add(1, Post.NO_POST_MARKER)
                 }
             }
             LoadResult.Page(

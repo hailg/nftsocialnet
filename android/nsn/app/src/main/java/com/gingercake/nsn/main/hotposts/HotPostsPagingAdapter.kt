@@ -76,6 +76,7 @@ class HotPostsPagingAdapter constructor(
                 }
                 binding.postCardView.isVisible = true
                 binding.postTitle.text = item.title
+                binding.postContent.text = item.content
                 binding.authorName.text = item.owner.name
                 binding.updateDate.text = DateUtils.getRelativeDateTimeString(
                     itemView.context,

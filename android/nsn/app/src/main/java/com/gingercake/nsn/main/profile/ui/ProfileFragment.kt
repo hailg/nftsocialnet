@@ -64,9 +64,6 @@ class ProfileFragment : DaggerFragment(), ProfilePagingAdapter.Interaction {
             val action = ProfileFragmentDirections.actionProfileFragmentToNewPostFragment()
             findNavController().navigate(action)
         }
-        mainViewModel.accountBalanceLiveData.observe(viewLifecycleOwner, { balance ->
-            SessionManager.currentUser.eosAmount = balance
-        })
         mainViewModel.postCreationLiveData.observe(viewLifecycleOwner, {
             Log.d(TAG, "onPostCreation change: $it")
             when (it.state) {

@@ -23,7 +23,9 @@
         <activity
             android:name=".auth.AuthActivity"
             android:label="NSN"
-            android:theme="@style/SplashTheme">
+            android:theme="@style/SplashTheme"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
