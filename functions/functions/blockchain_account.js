@@ -169,7 +169,7 @@ const createAccount = async (userId, username, password) => {
         data: {
           from: tokenAccount,
           quantity: `${welcomeBonus} EOS`,
-          memo: "Welcome gift.",
+          memo: "Welcome to NSN! Enjoy this little bonus to get you started.",
         },
       });
   } catch (e) {

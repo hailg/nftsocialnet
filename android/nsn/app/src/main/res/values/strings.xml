@@ -42,7 +42,7 @@
     <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
     <string name="default_notification_channel_name" translatable="true">NSN</string>
     <string name="fcm_message">NSN</string>
-    <string name="block_chain">Blockchain</string>
+    <string name="block_chain">Blockchain Transactions</string>
     <string name="blockchain_data">Blockchain Data</string>
     <string name="username">Username</string>
     <string name="your_12_characters_username">Your 12 characters username</string>

@@ -21,7 +21,7 @@ function getEncryptionKey(password) {
     .digest();
 }
 
-exports.welcomeBonus = "10.0000";
+exports.welcomeBonus = "100.0000";
 const eosPrivateKey = systemConfig.eos_private_key;
 exports.eosPrivateKey = eosPrivateKey;
 const tokenPrivateKey = systemConfig.nsn_private_key;

@@ -210,7 +210,7 @@ const createPost = async (userId, post, password) => {
           postTitle: post.title,
           postResource: post.resource,
           postResourceType: `${post.resourceType}`,
-          dgoodId: dgoodId,
+          dgoodId: `${dgoodId}`,
           dgoodName: dgoodName,
         },
       });
@@ -239,9 +239,9 @@ const createPost = async (userId, post, password) => {
             postContent: post.content,
             postResource: post.resource,
             postResourceType: `${post.resourceType}`,
-            dgoodId: dgoodId,
-            dgoodName: dgoodName,
-            dgoodBatchId: dgoodBatchId,
+            dgoodName: post.dgoodName,
+            dgoodId: `${post.dgoodId}`,
+            dgoodBatchId: `${post.dgoodBatchId}`,
             price: post.price,
           },
         });
@@ -363,6 +363,8 @@ const purchasePost = async (userId, post, password, newPrice) => {
     }
   }
 
+  functions.logger.log("post", post.id, "rank", post.rank);
+
   await admin
     .firestore()
     .collection("posts")
@@ -374,6 +376,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
         uid: user.uid,
       },
       price: newPrice,
+      rank: admin.firestore.FieldValue.increment(20),
     });
 
   let postOwnerId = post.owner.uid;
@@ -393,6 +396,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
       timestamp: Date.now(),
       data: {
         postId: post.id,
+        ownerId: postOwnerId,
         ownerName: postOwnerName,
         ownerPhoto: postOwnerPhoto,
         authorId: postAuthorId,
@@ -405,9 +409,9 @@ const purchasePost = async (userId, post, password, newPrice) => {
         postContent: post.content,
         postResource: post.resource,
         postResourceType: `${post.resourceType}`,
-        dgoodId: post.dgoodId,
         dgoodName: post.dgoodName,
-        dgoodBatchId: post.dgoodBatchId,
+        dgoodId: `${post.dgoodId}`,
+        dgoodBatchId: `${post.dgoodBatchId}`,
         price: post.price,
       },
     });
@@ -422,6 +426,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
       timestamp: Date.now(),
       data: {
         postId: post.id,
+        ownerId: postOwnerId,
         ownerName: postOwnerName,
         ownerPhoto: postOwnerPhoto,
         authorId: postAuthorId,
@@ -434,21 +439,28 @@ const purchasePost = async (userId, post, password, newPrice) => {
         postContent: post.content,
         postResource: post.resource,
         postResourceType: `${post.resourceType}`,
-        dgoodId: post.dgoodId,
         dgoodName: post.dgoodName,
-        dgoodBatchId: post.dgoodBatchId,
+        dgoodId: `${post.dgoodId}`,
+        dgoodBatchId: `${post.dgoodBatchId}`,
         price: post.price,
       },
     });
 
-  if (postAuthorId != postOwnerId) {
+  if (postAuthorId !== postOwnerId) {
+    let postAuthor = await (
+      await admin.firestore().collection("users").doc(postAuthorId).get()
+    ).data();
     let purchaseActions =
       purchaseTransactionResult.processed.action_traces[0].inline_traces;
     for (let action of purchaseActions) {
       let actionName = action.act.name;
       if (actionName === "transfer") {
         let actData = action.act.data;
-        if (actData.from === dgoodsAccount && actData.to === postAuthorId) {
+        if (
+          actData.from === dgoodsAccount &&
+          actData.to === postAuthor.username
+        ) {
+          functions.logger.log("creating royal fee", action);
           await admin
             .firestore()
             .collection("transactions")
@@ -459,6 +471,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
               timestamp: Date.now(),
               data: {
                 postId: post.id,
+                ownerId: postOwnerId,
                 ownerName: postOwnerName,
                 ownerPhoto: postOwnerPhoto,
                 authorId: postAuthorId,
@@ -471,9 +484,9 @@ const purchasePost = async (userId, post, password, newPrice) => {
                 postContent: post.content,
                 postResource: post.resource,
                 postResourceType: `${post.resourceType}`,
-                dgoodId: post.dgoodId,
                 dgoodName: post.dgoodName,
-                dgoodBatchId: post.dgoodBatchId,
+                dgoodId: `${post.dgoodId}`,
+                dgoodBatchId: `${post.dgoodBatchId}`,
                 price: post.price,
                 amount: actData.quantity.replace(" EOS", ""),
               },
@@ -545,9 +558,9 @@ const purchasePost = async (userId, post, password, newPrice) => {
         postContent: post.content,
         postResource: post.resource,
         postResourceType: `${post.resourceType}`,
-        dgoodId: post.dgoodId,
+        dgoodId: `${post.dgoodId}`,
         dgoodName: post.dgoodName,
-        dgoodBatchId: dgoodBatchId,
+        dgoodBatchId: `${dgoodBatchId}`,
         price: newPrice,
       },
     });

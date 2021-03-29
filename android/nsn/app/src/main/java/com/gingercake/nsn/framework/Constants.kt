@@ -7,4 +7,5 @@ object Constants {
     const val USERS_COLLECTION = "users"
     const val LIKES_COLLECTION = "likes"
     const val COMMENTS_COLLECTION = "comments"
+    const val BLOCKCHAIN_COLLECTION = "transactions"
 }

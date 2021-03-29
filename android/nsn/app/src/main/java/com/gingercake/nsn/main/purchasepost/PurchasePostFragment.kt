@@ -118,6 +118,7 @@ class PurchasePostFragment : BaseChildFragment() {
                 CreatePostProgress.SUCCESS -> {
                     purchasingPostId = ""
                     findNavController().popBackStack()
+                    (activity as MainActivity).gotoProfilePage()
                 }
                 CreatePostProgress.FAIL -> {
                     binding.purchaseForm.isVisible = true

@@ -1,5 +1,6 @@
 package com.gingercake.nsn.main.di
 
+import com.gingercake.nsn.main.blockchain.BlockChainFragment
 import com.gingercake.nsn.main.home.ui.HomeFragment
 import com.gingercake.nsn.main.hotposts.HotPostsFragment
 import com.gingercake.nsn.main.newpost.NewPostFragment
@@ -37,4 +38,7 @@ abstract class MainFragmentBuildersModule {
 
     @ContributesAndroidInjector
     abstract fun contributePurchasePostFragment(): PurchasePostFragment
+
+    @ContributesAndroidInjector
+    abstract fun contributeBlockchainFragment(): BlockChainFragment
 }

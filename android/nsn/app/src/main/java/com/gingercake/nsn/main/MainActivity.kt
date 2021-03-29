@@ -100,6 +100,10 @@ class MainActivity : DaggerAppCompatActivity() {
         mainViewModel.createPost(postId, title, content, resourcePath, resourceType, price, password)
     }
 
+    fun gotoProfilePage() {
+        bottomNavView.selectedItemId = R.id.profileFragment
+    }
+
     companion object {
         private const val TAG = "MainActivity"
     }

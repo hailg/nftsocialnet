@@ -4,14 +4,13 @@ import android.os.Parcelable
 import com.gingercake.nsn.model.user.User
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
 data class Transaction(
-        val id: String,
+        val trxId: String,
         val type: String,
         val userId: String,
         val timestamp: Long,
         val data: Map<String, String> = emptyMap()
-) : Parcelable {
+) {
     constructor() : this("", "", "", 0)
 
     companion object {
