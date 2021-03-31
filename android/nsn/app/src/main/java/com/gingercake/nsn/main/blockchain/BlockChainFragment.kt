@@ -1,15 +1,14 @@
 package com.gingercake.nsn.main.blockchain
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.view.isVisible
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.RequestManager
 import com.firebase.ui.firestore.paging.FirestorePagingOptions
 import com.firebase.ui.firestore.paging.LoadingState
+import com.gingercake.nsn.R
 import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentBlockChainBinding
 import com.gingercake.nsn.framework.Constants
@@ -32,6 +31,7 @@ class BlockChainFragment : DaggerFragment(), BlockchainPagingAdapter.Listener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true);
         val query = db
             .collection(Constants.BLOCKCHAIN_COLLECTION)
             .whereEqualTo("userId", SessionManager.currentUser.uid)
@@ -74,6 +74,7 @@ class BlockChainFragment : DaggerFragment(), BlockchainPagingAdapter.Listener {
         blockchainPagingAdapter.stopListening()
     }
 
+
     override fun onItemSelected(position: Int, item: Transaction) {
 
     }
@@ -102,6 +103,11 @@ class BlockChainFragment : DaggerFragment(), BlockchainPagingAdapter.Listener {
                 binding.progressBarLoadMore.isVisible = true
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.signout_menu, menu)
     }
 
     private fun refresh() {

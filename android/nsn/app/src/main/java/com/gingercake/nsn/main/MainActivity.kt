@@ -1,5 +1,6 @@
 package com.gingercake.nsn.main
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,8 +13,11 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import com.gingercake.nsn.R
+import com.gingercake.nsn.auth.AuthActivity
 import com.gingercake.nsn.databinding.ActivityMainBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
 import dagger.android.support.DaggerAppCompatActivity
 import javax.inject.Inject
 
@@ -44,9 +48,19 @@ class MainActivity : DaggerAppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        super.onOptionsItemSelected(item)
-        Log.d(TAG, "onOptionsItemSelected: ")
-        return true
+        if (item.itemId == R.id.sign_out) {
+            MaterialAlertDialogBuilder(this)
+                    .setTitle(resources.getString(R.string.app_name))
+                    .setMessage(resources.getString(R.string.are_you_sure_you_want_to_quit))
+                    .setNeutralButton(resources.getString(R.string.cancel_stay)) { dialog, which ->
+                        // Respond to neutral button press
+                    }
+                    .setPositiveButton(resources.getString(R.string.yes_quit)) { dialog, which ->
+                        signOut()
+                    }
+                    .show()
+        }
+        return false
     }
     override fun onBackPressed() {
         val navController = findNavController(R.id.fragNavHost)
@@ -102,6 +116,13 @@ class MainActivity : DaggerAppCompatActivity() {
 
     fun gotoProfilePage() {
         bottomNavView.selectedItemId = R.id.profileFragment
+    }
+
+    fun signOut() {
+        FirebaseAuth.getInstance().signOut()
+//        val authIntent = Intent(this, AuthActivity::class.java)
+//        startActivity(authIntent)
+        finish()
     }
 
     companion object {

@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.aminography.choosephotohelper.ChoosePhotoHelper
 import com.bumptech.glide.RequestManager
 import com.gingercake.nsn.R
+import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentNewPostBinding
 import com.gingercake.nsn.framework.BaseChildFragment
 import javax.inject.Inject
@@ -58,7 +59,23 @@ class NewPostFragment : BaseChildFragment() {
                 binding.content.editText?.text.toString(),
                 photoFile ?: ""
             )
+            SessionManager.currentPostTitle = binding.title.editText?.text.toString()
+            SessionManager.currentPostContent = binding.content.editText?.text.toString()
+            SessionManager.currentPostResourceFile = photoFile ?: ""
             findNavController().navigate(action)
+        }
+
+        if (SessionManager.currentPostTitle.isNotEmpty()) {
+            binding.title.editText?.setText(SessionManager.currentPostTitle)
+        }
+        if (SessionManager.currentPostContent.isNotEmpty()) {
+            binding.content.editText?.setText(SessionManager.currentPostContent)
+        }
+        if (SessionManager.currentPostResourceFile.isNotEmpty()) {
+            photoFile = SessionManager.currentPostResourceFile
+            requestManager
+                    .load(photoFile)
+                    .into(binding.postImage)
         }
         return binding.root
     }

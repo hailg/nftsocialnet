@@ -59,8 +59,12 @@
     <string name="please_enter_password_to_buy">Please enter your password to purchase this post.</string>
     <string name="working_on_your_post_please_wait">Working on your post. Please wait!</string>
     <string name="okay">Okay</string>
+    <string name="cancel_stay">No, Stay!</string>
+    <string name="yes_quit">Sign out</string>
     <string name="making_the_purchase_please_wait">Making the purchase. Please wait!</string>
     <string name="buy_this_nsn_post">Buy this NSN post</string>
     <string name="to_confirm_your_purchase_please_enter_your_wallet_password_below">To confirm your purchase, please enter your wallet password below:</string>
     <string name="new_sale_price">New sale price</string>
+    <string name="sign_out">Sign out</string>
+    <string name="are_you_sure_you_want_to_quit">Are you sure you want to sign out?</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.gingercake.nsn.R
+import com.gingercake.nsn.SessionManager
 import com.gingercake.nsn.databinding.FragmentNewPostSaleSettingBinding
 import com.gingercake.nsn.framework.BaseChildFragment
 import com.gingercake.nsn.framework.hideKeyboard
@@ -95,6 +96,9 @@ class NewPostSaleSettingFragment : BaseChildFragment() {
             when (it.state) {
                 CreatePostProgress.SUCCESS -> {
                     creatingPostId = ""
+                    SessionManager.currentPostTitle = ""
+                    SessionManager.currentPostContent = ""
+                    SessionManager.currentPostResourceFile = ""
                     findNavController().popBackStack()
                     findNavController().popBackStack()
                 }
