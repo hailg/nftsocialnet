@@ -318,7 +318,8 @@ class AuthActivity : DaggerAppCompatActivity() {
                         .setAvailableProviders(providers)
                         .setLogo(R.mipmap.logo)
                         .setTheme(R.style.LoginTheme)
-                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                        .setIsSmartLockEnabled(false)
+//                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                         .build(),
                 RC_SIGN_IN
         )

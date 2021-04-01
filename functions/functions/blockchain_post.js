@@ -11,6 +11,7 @@ const {
   dgoodSymbol,
   eosNameGenerator,
   createEOSApi,
+  sendTextNotification,
 } = require("./utils");
 
 const issueNSNToUser = async (username, postId, tokenName, royalFee) => {
@@ -182,7 +183,7 @@ const listNSNForSale = async (user, userAPI, postId, dgoodId, price) => {
 
 const createPost = async (userId, post, password) => {
   functions.logger.log(userId, "Creating post", post.id);
-  let user = await (
+  let user = (
     await admin.firestore().collection("users").doc(userId).get()
   ).data();
   var userAPI = null;
@@ -324,7 +325,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
     ". New price",
     newPrice
   );
-  let user = await (
+  let user = (
     await admin.firestore().collection("users").doc(userId).get()
   ).data();
   let userAPI = createEOSApi(user, password);
@@ -379,6 +380,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
       rank: admin.firestore.FieldValue.increment(20),
     });
 
+  let salePrice = post.price;
   let postOwnerId = post.owner.uid;
   let postOwnerName = post.owner.name;
   let postOwnerPhoto = post.owner.photoUrl;
@@ -386,6 +388,8 @@ const purchasePost = async (userId, post, password, newPrice) => {
   let postAuthorName = post.author.name;
   let postAuthorPhoto = post.author.photoUrl;
   let purchaseTransactionResult = purchase.transactionResult;
+  let postAuthor = null;
+  let postRoyalFee = null;
   await admin
     .firestore()
     .collection("transactions")
@@ -447,7 +451,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
     });
 
   if (postAuthorId !== postOwnerId) {
-    let postAuthor = await (
+    postAuthor = (
       await admin.firestore().collection("users").doc(postAuthorId).get()
     ).data();
     let purchaseActions =
@@ -491,6 +495,7 @@ const purchasePost = async (userId, post, password, newPrice) => {
                 amount: actData.quantity.replace(" EOS", ""),
               },
             });
+          postRoyalFee = actData.quantity;
           break;
         }
       }
@@ -567,6 +572,24 @@ const purchasePost = async (userId, post, password, newPrice) => {
   await admin.firestore().collection("posts").doc(post.id).update({
     dgoodBatchId: dgoodBatchId,
   });
+
+  let owner = (
+    await admin.firestore().collection("users").doc(postOwnerId).get()
+  ).data();
+  if (owner.fcmTokens) {
+    await sendTextNotification(
+      owner.fcmTokens,
+      `Congrats! You just sold one NSN post and earned ${salePrice} EOS.`
+    );
+  }
+
+  if (postAuthor && postAuthor.fcmTokens) {
+    await sendTextNotification(
+      postAuthor.fcmTokens,
+      `Congrats! You just earned royal fee of ${postRoyalFee}.`
+    );
+  }
+
   functions.logger.log(
     userId,
     "Purchased post",
@@ -589,7 +612,7 @@ exports.createPost = functions.https.onCall(async (data, context) => {
   let uid = context.auth.uid;
   let postId = data.postId;
   let password = data.password;
-  let post = await (
+  let post = (
     await admin.firestore().collection("posts").doc(postId).get()
   ).data();
   if (post.owner.uid != uid) {
@@ -613,7 +636,7 @@ exports.purchasePost = functions.https.onCall(async (data, context) => {
   let postId = data.postId;
   let newPrice = data.newPrice;
   let password = data.password;
-  let post = await (
+  let post = (
     await admin.firestore().collection("posts").doc(postId).get()
   ).data();
   if (post.owner.uid == uid) {

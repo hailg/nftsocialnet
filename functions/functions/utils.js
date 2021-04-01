@@ -98,6 +98,21 @@ exports.validateEOSName = (username) => {
   return validatingUsername;
 };
 
+exports.sendTextNotification = async (tokens, text) => {
+  let payload = {
+    notification: {
+      title: "NSN",
+      body: text
+        ? text.length <= 100
+          ? text
+          : text.substring(0, 97) + "..."
+        : "",
+    },
+  };
+  let response = await admin.messaging().sendToDevice(tokens, payload);
+  await cleanupTokens(response, tokens);
+};
+
 exports.sendNotification = async (tokens, payload) => {
   const response = await admin.messaging().sendToDevice(tokens, payload);
   await cleanupTokens(response, tokens);

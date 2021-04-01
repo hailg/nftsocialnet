@@ -19,6 +19,7 @@
             android:name=".main.MainActivity"
             android:label="NSN"
             android:screenOrientation="portrait"
+            android:launchMode="singleInstance"
             />
         <activity
             android:name=".auth.AuthActivity"

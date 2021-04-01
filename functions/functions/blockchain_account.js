@@ -12,6 +12,7 @@ const {
   validateEOSName,
   encryptPrivateKey,
   rpc,
+  sendTextNotification,
 } = require("./utils");
 
 const issueBonusToNewUser = async (username) => {
@@ -155,6 +156,7 @@ const createAccount = async (userId, username, password) => {
     }
   }
 
+  var tokenIssued = false;
   try {
     let issueTrxId = await issueBonusToNewUser(username);
     await admin
@@ -172,6 +174,7 @@ const createAccount = async (userId, username, password) => {
           memo: "Welcome to NSN! Enjoy this little bonus to get you started.",
         },
       });
+    tokenIssued = true;
   } catch (e) {
     functions.logger.error("failed to issue welcome gift", userId, "error", e);
     throw new functions.https.HttpsError(
@@ -186,6 +189,17 @@ const createAccount = async (userId, username, password) => {
     privateKey: encryptedPK,
     publicKey: publicKey,
   });
+  if (tokenIssued) {
+    let user = (
+      await admin.firestore().collection("users").doc(userId).get()
+    ).data();
+    if (user.fcmTokens) {
+      await sendTextNotification(
+        user.fcmTokens,
+        `Welcome to NSN! We gave you ${welcomeBonus} EOS to get you start.`
+      );
+    }
+  }
 };
 
 exports.createAccount = functions.https.onCall(async (data, context) => {
@@ -221,21 +235,3 @@ exports.getAccountBalance = functions.https.onCall(async (data, context) => {
     },
   };
 });
-
-// exports.createAccountTesting = functions.firestore
-//   .document("/users/{userId}")
-//   .onCreate(async (snap, context) => {
-//     const newData = snap.data();
-//     var publicKey = "";
-//     try {
-//       publicKey = await createAccount(
-//         newData.uid,
-//         newData.username,
-//         newData.password
-//       );
-//     } catch (e) {}
-//     functions.logger.log(`Returning ${publicKey}`);
-//     return {
-//       publicKey: publicKey,
-//     };
-//   });

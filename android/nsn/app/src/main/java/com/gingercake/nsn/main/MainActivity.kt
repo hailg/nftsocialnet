@@ -120,9 +120,15 @@ class MainActivity : DaggerAppCompatActivity() {
 
     fun signOut() {
         FirebaseAuth.getInstance().signOut()
-//        val authIntent = Intent(this, AuthActivity::class.java)
-//        startActivity(authIntent)
-        finish()
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                val authIntent = Intent(this@MainActivity, AuthActivity::class.java)
+                startActivity(authIntent)
+                finish()
+            }
+        }, 1000)
+
     }
 
     companion object {
